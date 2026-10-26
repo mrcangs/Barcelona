@@ -38,11 +38,36 @@
   const mapsUrl = (name, where) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${name}, ${where || ''}, Barcelona`);
   const mapsFor = a => mapsUrl(a.name, a.addr || a.area);
 
+  // ---------- dil ----------
+  // Varsayılan Türkçe; lang: 'es' olan kişi seçilince arayüz + içerik İspanyolcaya geçer.
+  let LANG = 'tr';
+  const TL = (lang, k, vars) => {
+    let s = (UI[lang] && UI[lang][k]) || UI.tr[k] || k;
+    if (vars) Object.keys(vars).forEach(n => { s = s.split('{' + n + '}').join(vars[n]); });
+    return s;
+  };
+  const T = (k, vars) => TL(LANG, k, vars);
+  const locale = () => (LANG === 'es' ? 'es-ES' : 'tr-TR');
+
+  function applyStaticText() {
+    $$('[data-i18n]').forEach(el => { el.textContent = T(el.dataset.i18n); });
+    $$('[data-i18n-ph]').forEach(el => { el.placeholder = T(el.dataset.i18nPh); });
+    $$('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', T(el.dataset.i18nAria)); });
+  }
+
+  function setLang(lang) {
+    if (lang === LANG) return;
+    LANG = lang;
+    if (lang === 'es') applySpanishContent();
+    document.documentElement.lang = lang;
+    applyStaticText();
+  }
+
   // Kart içindeki web sitesi / harita kısayolları
   function linkButtons(a) {
     const cls = 'h-8 px-2.5 rounded-lg btn-ghost inline-flex items-center gap-1.5 text-xs font-bold';
-    const web = a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="${cls}" aria-label="${esc(a.name)} web sitesi"><i class="fa-solid fa-globe accent" aria-hidden="true"></i>Web sitesi</a>` : '';
-    const map = `<a href="${esc(mapsFor(a))}" target="_blank" rel="noopener" class="${cls}" aria-label="${esc(a.name)} Google Maps"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i>Harita</a>`;
+    const web = a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="${cls}" aria-label="${esc(a.name)} · ${esc(T('link.web'))}"><i class="fa-solid fa-globe accent" aria-hidden="true"></i>${esc(T('link.web'))}</a>` : '';
+    const map = `<a href="${esc(mapsFor(a))}" target="_blank" rel="noopener" class="${cls}" aria-label="${esc(a.name)} · Google Maps"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i>${esc(T('link.map'))}</a>`;
     return `<div class="flex flex-wrap gap-1.5 mt-2">${web}${map}</div>`;
   }
 
@@ -82,6 +107,10 @@
     }
     return POOL.find(a => a.id === id) || null;
   }
+
+  // Havuz mekanlarında güncel (dile göre) ad/semt; kendi önerilerde kayıttaki değer
+  const itemName = item => { const a = activity(item.activityId); return a && !a.custom ? a.name : item.name; };
+  const itemArea = item => { const a = activity(item.activityId); return a && !a.custom ? a.area : item.area; };
 
   function allActivities() {
     const custom = Object.keys(customActs()).map(k => activity('custom:' + k)).filter(Boolean);
@@ -139,27 +168,28 @@
     const end = new Date(DAYS[DAYS.length - 1].date + 'T23:59:59');
     const now = new Date();
     if (now < start) {
-      const days = Math.ceil((start - now) / 86400000);
-      return `11–16 Kasım · ${days} gün kaldı`;
+      return T('count.before', { n: Math.ceil((start - now) / 86400000) });
     }
     if (now <= end) {
       const idx = DAYS.findIndex(d => d.key === todayKey());
-      return `Gün ${idx + 1} / ${DAYS.length} · iyi tatiller!`;
+      return T('count.during', { i: idx + 1, n: DAYS.length });
     }
-    return '11–16 Kasım · tamamlandı';
+    return T('count.after');
   }
+
+  const whereText = (day, slot) => `${dayOf(day).short} ${dayOf(day).num} ${slotOf(slot).label}`;
 
   // ---------- yazma işlemleri ----------
   function write(path, value) {
-    if (!tripRef) return Promise.reject(new Error('Bağlantı yok'));
-    return tripRef.child(path).set(value).catch(err => { toast('Kaydedilemedi: ' + err.code); throw err; });
+    if (!tripRef) return Promise.reject(new Error('offline'));
+    return tripRef.child(path).set(value).catch(err => { toast(T('toast.saveFail', { e: err.code })); throw err; });
   }
 
   function addToSlot(actId, day, slot) {
     const act = activity(actId);
     if (!act) return;
     const exists = Object.values(slotItems(day, slot)).some(i => i.activityId === actId);
-    if (exists) { toast('Bu slotta zaten var'); return; }
+    if (exists) { toast(T('toast.dup')); return; }
     const ref = tripRef.child(`slots/${day}/${slot}`).push();
     ref.set({
       activityId: act.id,
@@ -168,8 +198,8 @@
       area: act.area || '',
       addedBy: state.me,
       addedAt: firebase.database.ServerValue.TIMESTAMP
-    }).then(() => toast(`Eklendi · ${dayOf(day).short} ${dayOf(day).num} ${slotOf(slot).label}`))
-      .catch(err => toast('Kaydedilemedi: ' + err.code));
+    }).then(() => toast(T('toast.added', { where: whereText(day, slot) })))
+      .catch(err => toast(T('toast.saveFail', { e: err.code })));
   }
 
   function moveItem(day, slot, key, toDay, toSlot) {
@@ -179,13 +209,13 @@
     tripRef.update({
       [`slots/${toDay}/${toSlot}/${key}`]: item,
       [`slots/${day}/${slot}/${key}`]: null
-    }).then(() => toast(`Taşındı · ${dayOf(toDay).short} ${dayOf(toDay).num} ${slotOf(toSlot).label}`))
-      .catch(err => toast('Taşınamadı: ' + err.code));
+    }).then(() => toast(T('toast.moved', { where: whereText(toDay, toSlot) })))
+      .catch(err => toast(T('toast.moveFail', { e: err.code })));
   }
 
   function removeItem(day, slot, key) {
     tripRef.update({ [`slots/${day}/${slot}/${key}`]: null, [`slot_votes/${key}`]: null })
-      .catch(err => toast('Silinemedi: ' + err.code));
+      .catch(err => toast(T('toast.delFail', { e: err.code })));
   }
 
   function vote(itemKey, v) {
@@ -206,7 +236,7 @@
         ${avatar(p.id, 'w-11 h-11 text-base')}
         <span class="min-w-0">
           <span class="block font-extrabold">${esc(p.name)}</span>
-          <span class="block text-[11px] muted">${esc(GROUPS[p.group].label)}${members[p.id] ? ' · <span class="ok font-bold">katıldı ✓</span>' : ''}</span>
+          <span class="block text-[11px] muted">${esc(GROUPS[p.group].label)}${members[p.id] ? ' · <span class="ok font-bold">✓</span>' : ''}</span>
         </span>
       </button>`).join('');
   }
@@ -240,8 +270,8 @@
       </button>`;
     }).join('');
     $('#viewToggle').innerHTML = state.view === 'day'
-      ? '<i class="fa-solid fa-list" aria-hidden="true"></i><span class="ml-1.5">Özet</span>'
-      : '<i class="fa-solid fa-calendar-day" aria-hidden="true"></i><span class="ml-1.5">Gün</span>';
+      ? `<i class="fa-solid fa-list" aria-hidden="true"></i><span class="ml-1.5">${esc(T('view.summary'))}</span>`
+      : `<i class="fa-solid fa-calendar-day" aria-hidden="true"></i><span class="ml-1.5">${esc(T('view.day'))}</span>`;
   }
 
   // ---------- RENDER: zaman çizelgesi ----------
@@ -251,7 +281,7 @@
     Object.entries(HYROX_EVENT).forEach(([opt, ev]) => {
       if (ev.day !== day || ev.slot !== slot) return;
       if (w === opt) list.push(ev);
-      else if (!w) list.push(Object.assign({}, ev, { pending: true, title: ev.title + ' (karar bekleniyor)' }));
+      else if (!w) list.push(Object.assign({}, ev, { pending: true, title: ev.title + T('fixed.pending') }));
     });
     return list;
   }
@@ -261,7 +291,7 @@
       <i class="fa-solid ${ev.icon} w-4 text-center ${ev.pending ? 'muted' : 'accent'}" aria-hidden="true"></i>
       <span class="text-[11px] font-bold muted w-14 shrink-0">${esc(ev.time)}</span>
       <span class="text-sm font-semibold ${ev.pending ? 'muted' : ''}">${esc(ev.title)}</span>
-      ${ev.pending ? '' : '<i class="fa-solid fa-lock text-[10px] muted ml-auto" aria-label="Sabit"></i>'}
+      ${ev.pending ? '' : `<i class="fa-solid fa-lock text-[10px] muted ml-auto" aria-label="${esc(T('fixed.locked'))}"></i>`}
     </div>`;
   }
 
@@ -276,25 +306,26 @@
     const key = esc(rawKey);
     const cat = item.cat || act.cat || 'custom';
     const by = person(item.addedBy);
+    const area = itemArea(item);
     return `<article data-action="detail" data-day="${day}" data-slot="${slot}" data-key="${key}" draggable="true" data-drag-item="1"
       class="surface rounded-xl p-3 cursor-pointer hover:shadow-md transition ${item.confirmed ? 'ring-accent' : ''}">
       <div class="flex items-start gap-3">
         <span class="tag-${esc(cat)} w-9 h-9 shrink-0 rounded-xl flex items-center justify-center"><i class="fa-solid ${act.icon || 'fa-star'}" aria-hidden="true"></i></span>
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-1.5 flex-wrap">
-            <h4 class="text-sm font-extrabold leading-snug">${esc(item.name)}</h4>
-            ${item.confirmed ? '<span class="tag btn-accent"><i class="fa-solid fa-check" aria-hidden="true"></i> Kesin</span>' : ''}
-            ${act.res ? '<span class="tag tag-res" title="Rezervasyon / bilet gerekli"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>' : ''}
+            <h4 class="text-sm font-extrabold leading-snug">${esc(itemName(item))}</h4>
+            ${item.confirmed ? `<span class="tag btn-accent"><i class="fa-solid fa-check" aria-hidden="true"></i> ${esc(T('item.confirmed'))}</span>` : ''}
+            ${act.res ? `<span class="tag tag-res" title="${esc(T('item.resNeeded'))}"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>` : ''}
           </div>
           <div class="flex items-center gap-1.5 mt-1 flex-wrap text-[11px] muted">
-            ${item.area ? `<span>${esc(item.area)}</span>` : ''}
+            ${area ? `<span>${esc(area)}</span>` : ''}
             ${groupChips(item.groups)}
             ${by ? `<span class="inline-flex items-center gap-1">· <span class="w-3.5 h-3.5 rounded-full inline-block" style="background:${by.color}"></span>${esc(by.name)}</span>` : ''}
           </div>
         </div>
         <div class="flex items-center gap-0.5 shrink-0">
-          <button data-action="vote" data-key="${key}" data-v="up" class="h-9 min-w-[40px] px-2 rounded-lg text-xs font-bold ${t.mine === 'up' ? 'ok btn-ghost' : 'muted'}" aria-label="Beğen"><i class="fa-solid fa-thumbs-up" aria-hidden="true"></i> ${t.up.length}</button>
-          <button data-action="vote" data-key="${key}" data-v="down" class="h-9 min-w-[40px] px-2 rounded-lg text-xs font-bold ${t.mine === 'down' ? 'bad btn-ghost' : 'muted'}" aria-label="Beğenme"><i class="fa-solid fa-thumbs-down" aria-hidden="true"></i> ${t.down.length}</button>
+          <button data-action="vote" data-key="${key}" data-v="up" class="h-9 min-w-[40px] px-2 rounded-lg text-xs font-bold ${t.mine === 'up' ? 'ok btn-ghost' : 'muted'}" aria-label="${esc(T('item.like'))}"><i class="fa-solid fa-thumbs-up" aria-hidden="true"></i> ${t.up.length}</button>
+          <button data-action="vote" data-key="${key}" data-v="down" class="h-9 min-w-[40px] px-2 rounded-lg text-xs font-bold ${t.mine === 'down' ? 'bad btn-ghost' : 'muted'}" aria-label="${esc(T('item.dislike'))}"><i class="fa-solid fa-thumbs-down" aria-hidden="true"></i> ${t.down.length}</button>
         </div>
       </div>
     </article>`;
@@ -307,11 +338,11 @@
     return `<div class="dashed rounded-xl p-3 flex items-center gap-3">
       <span class="tag-${act.cat} w-9 h-9 shrink-0 rounded-xl flex items-center justify-center opacity-70"><i class="fa-solid ${act.icon}" aria-hidden="true"></i></span>
       <div class="min-w-0 flex-1">
-        <div class="text-[10px] font-bold uppercase tracking-wide terra">Öneri</div>
+        <div class="text-[10px] font-bold uppercase tracking-wide terra">${esc(T('sugg.label'))}</div>
         <div class="text-sm font-bold leading-snug">${esc(act.name)}</div>
         <div class="text-[11px] muted">${esc(who)}${esc(s.note || act.area)}</div>
       </div>
-      <button data-action="accept" data-act="${act.id}" data-day="${day}" data-slot="${slot}" class="h-9 px-3 rounded-lg btn-soft text-xs font-bold shrink-0">Ekle</button>
+      <button data-action="accept" data-act="${act.id}" data-day="${day}" data-slot="${slot}" class="h-9 px-3 rounded-lg btn-soft text-xs font-bold shrink-0">${esc(T('sugg.add'))}</button>
     </div>`;
   }
 
@@ -342,17 +373,17 @@
             <div class="min-w-0">
               <h3 class="text-sm font-extrabold flex items-center gap-2 ${slot.nap ? 'nap-ink' : ''}">
                 ${slot.nap ? '<i class="fa-solid fa-moon" aria-hidden="true"></i>' : ''}${esc(slot.label)}
-                ${status === 'now' ? '<span class="tag btn-accent">Şimdi</span>' : ''}
+                ${status === 'now' ? `<span class="tag btn-accent">${esc(T('slot.now'))}</span>` : ''}
               </h3>
               <p class="text-[11px] ${slot.nap ? 'nap-ink opacity-80' : 'muted'} truncate">${esc(isClosed ? closed[slot.key] : slot.hint)}</p>
             </div>
-            ${isClosed ? '' : `<button data-action="pick-activity" data-slot="${slot.key}" class="shrink-0 w-10 h-10 rounded-xl btn-soft" aria-label="${esc(slot.label)} slotuna ekle"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>`}
+            ${isClosed ? '' : `<button data-action="pick-activity" data-slot="${slot.key}" class="shrink-0 w-10 h-10 rounded-xl btn-soft" aria-label="${esc(T('slot.addAria', { slot: slot.label }))}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>`}
           </div>
           <div class="space-y-2">
             ${fixed.map(fixedCard).join('')}
             ${items.map(([k, it]) => itemCard(d.key, slot.key, k, it)).join('')}
             ${isClosed ? '' : sugg.map(s => suggestionCard(d.key, slot.key, s)).join('')}
-            ${!fixed.length && !items.length && (isClosed || !sugg.length) ? `<p class="text-xs muted text-center py-3">${isClosed ? esc(closed[slot.key]) : 'Boş · + ile havuzdan ekle'}</p>` : ''}
+            ${!fixed.length && !items.length && (isClosed || !sugg.length) ? `<p class="text-xs muted text-center py-3">${isClosed ? esc(closed[slot.key]) : esc(T('slot.empty'))}</p>` : ''}
           </div>
         </div>
       </section>`;
@@ -368,7 +399,7 @@
         const fixed = fixedEventsFor(d.key, slot.key).filter(e => !e.pending).map(e => `<span class="muted">${esc(e.title)}</span>`);
         const items = Object.values(slotItems(d.key, slot.key))
           .sort((a, b) => (b.confirmed ? 1 : 0) - (a.confirmed ? 1 : 0))
-          .map(i => i.confirmed ? `<strong>${esc(i.name)} ✓</strong>` : esc(i.name));
+          .map(i => i.confirmed ? `<strong>${esc(itemName(i))} ✓</strong>` : esc(itemName(i)));
         const all = fixed.concat(items);
         if (!all.length) return '';
         return `<div class="flex gap-3 text-sm py-1"><span class="w-20 shrink-0 text-[11px] font-bold muted pt-0.5">${esc(slot.label)}</span><span class="min-w-0">${all.join(' · ')}</span></div>`;
@@ -379,7 +410,7 @@
           <i class="fa-solid fa-chevron-right text-xs muted" aria-hidden="true"></i>
         </div>
         <p class="text-[11px] muted mb-2">${esc(d.desc)}</p>
-        ${rows || '<p class="text-xs muted">Henüz plan yok</p>'}
+        ${rows || `<p class="text-xs muted">${esc(T('summary.empty'))}</p>`}
       </button>`;
     }).join('')}</div>`;
   }
@@ -391,21 +422,21 @@
 
   // ---------- RENDER: havuz ----------
   function filteredActivities(targetSlot) {
-    const q = state.poolQuery.trim().toLocaleLowerCase('tr');
+    const q = state.poolQuery.trim().toLocaleLowerCase(LANG);
     let list = allActivities().filter(a =>
       (state.poolCat === 'all' || a.cat === state.poolCat) &&
-      (!q || `${a.name} ${a.area} ${a.desc}`.toLocaleLowerCase('tr').includes(q)));
+      (!q || `${a.name} ${a.area} ${a.desc}`.toLocaleLowerCase(LANG).includes(q)));
     if (targetSlot) list = list.slice().sort((a, b) => (b.best.includes(targetSlot) ? 1 : 0) - (a.best.includes(targetSlot) ? 1 : 0));
     return list;
   }
 
   function catChipsHtml() {
-    const chips = [{ key: 'all', label: 'Tümü', icon: 'fa-border-all' }].concat(CATEGORIES);
+    const chips = [{ key: 'all', label: T('pool.all'), icon: 'fa-border-all' }].concat(CATEGORIES);
     return chips.map(c => `<button data-action="pool-cat" data-cat="${c.key}" class="shrink-0 h-9 px-3 rounded-full text-xs font-bold flex items-center gap-1.5 ${state.poolCat === c.key ? 'btn-accent' : 'surface'}"><i class="fa-solid ${c.icon}" aria-hidden="true"></i>${esc(c.label)}</button>`).join('');
   }
 
   function poolCard(a, targetSlot) {
-    const catLabel = (catOf(a.cat) || { label: 'Ekip önerisi' }).label;
+    const catLabel = (catOf(a.cat) || { label: T('pool.teamIdea') }).label;
     const fits = targetSlot && a.best.includes(targetSlot);
     return `<div ${targetSlot ? `data-action="add-here" data-act="${esc(a.id)}"` : `draggable="true" data-drag-act="${esc(a.id)}"`}
       class="surface rounded-xl p-3 flex gap-3 ${targetSlot ? 'cursor-pointer hover:shadow-md' : 'lg:cursor-grab'} transition">
@@ -413,11 +444,11 @@
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-1.5 flex-wrap">
           <h4 class="text-sm font-extrabold leading-snug">${esc(a.name)}</h4>
-          ${fits ? '<span class="tag btn-soft">Bu saate uygun</span>' : ''}
+          ${fits ? `<span class="tag btn-soft">${esc(T('pool.fits'))}</span>` : ''}
         </div>
         <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
           <span class="tag tag-${esc(a.cat)}">${esc(catLabel)}</span>
-          ${a.res ? '<span class="tag tag-res"><i class="fa-solid fa-ticket" aria-hidden="true"></i> Rezervasyon</span>' : ''}
+          ${a.res ? `<span class="tag tag-res"><i class="fa-solid fa-ticket" aria-hidden="true"></i> ${esc(T('pool.res'))}</span>` : ''}
           ${a.kid ? '<span class="tag surface2 muted"><i class="fa-solid fa-child" aria-hidden="true"></i></span>' : ''}
           ${a.area ? `<span class="text-[11px] muted">${esc(a.area)}</span>` : ''}
         </div>
@@ -425,14 +456,14 @@
         ${linkButtons(a)}
       </div>
       ${targetSlot ? '<span class="self-start w-9 h-9 shrink-0 rounded-lg btn-soft inline-flex items-center justify-center"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>'
-        : `<button data-action="pick-slot" data-act="${esc(a.id)}" class="self-start w-9 h-9 shrink-0 rounded-lg btn-soft" aria-label="${esc(a.name)} plana ekle"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>`}
+        : `<button data-action="pick-slot" data-act="${esc(a.id)}" class="self-start w-9 h-9 shrink-0 rounded-lg btn-soft" aria-label="${esc(T('pool.addAria', { name: a.name }))}"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>`}
     </div>`;
   }
 
   function renderPool() {
     $('#poolCats').innerHTML = catChipsHtml();
     const list = filteredActivities(null);
-    $('#poolList').innerHTML = list.length ? list.map(a => poolCard(a, null)).join('') : '<p class="text-sm muted text-center py-6">Sonuç yok</p>';
+    $('#poolList').innerHTML = list.length ? list.map(a => poolCard(a, null)).join('') : `<p class="text-sm muted text-center py-6">${esc(T('pool.none'))}</p>`;
   }
 
   // ---------- RENDER: kararlar, ekip, checklist ----------
@@ -441,8 +472,8 @@
     const joined = PEOPLE.filter(p => members[p.id]).length;
     $('#teamCard').innerHTML = `<div class="surface rounded-2xl p-4">
       <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-extrabold">Ekip</h2>
-        <span class="text-[11px] muted">${joined}/${PEOPLE.length} katıldı</span>
+        <h2 class="text-sm font-extrabold">${esc(T('team.title'))}</h2>
+        <span class="text-[11px] muted">${esc(T('team.joined', { n: joined, m: PEOPLE.length }))}</span>
       </div>
       <div class="flex gap-2 flex-wrap">${PEOPLE.map(p => `<div class="flex flex-col items-center gap-1 w-12 ${members[p.id] ? '' : 'opacity-35'}">${avatar(p.id, 'w-9 h-9 text-sm')}<span class="text-[10px] font-semibold truncate w-full text-center">${esc(p.name)}</span></div>`).join('')}</div>
       <div class="mt-3 grid gap-1.5">${Object.entries(GROUPS).map(([k, g]) => `<p class="text-[11px] muted"><strong class="accent">${k}</strong> · ${esc(g.who)}</p>`).join('')}</div>
@@ -456,7 +487,7 @@
         <div class="flex items-center gap-2 mb-1">
           <i class="fa-solid ${dec.icon} terra" aria-hidden="true"></i>
           <h2 class="text-sm font-extrabold">${esc(dec.title)}</h2>
-          <span class="ml-auto text-[11px] muted">${t.total}/${PEOPLE.length} oy</span>
+          <span class="ml-auto text-[11px] muted">${esc(T('dec.votes', { n: t.total, m: PEOPLE.length }))}</span>
         </div>
         <p class="text-xs muted mb-3">${esc(dec.desc)}</p>
         <div class="space-y-2">${dec.options.map(o => {
@@ -468,7 +499,7 @@
             <span class="relative flex items-center gap-2">
               <span class="w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center ${mine ? 'btn-accent border-transparent' : 'line'}">${mine ? '<i class="fa-solid fa-check text-[10px]" aria-hidden="true"></i>' : ''}</span>
               <span class="font-bold text-sm">${esc(o.label)}</span>
-              ${t.winner === o.id ? '<span class="tag btn-accent">Önde</span>' : ''}
+              ${t.winner === o.id ? `<span class="tag btn-accent">${esc(T('dec.leading'))}</span>` : ''}
               <span class="ml-auto flex -space-x-1.5">${voters.map(u => avatar(u, 'w-5 h-5 text-[9px] ring-2 ring-white/70')).join('')}</span>
             </span>
             <span class="relative block text-[11px] muted mt-1 pl-7">${esc(o.sub)}</span>
@@ -484,7 +515,7 @@
     const cats = [...new Set(CHECKLIST.map(c => c.cat))];
     $('#checklist').innerHTML = `<div class="surface rounded-2xl p-4">
       <div class="flex items-center justify-between mb-2">
-        <h2 class="text-sm font-extrabold flex items-center gap-2"><i class="fa-solid fa-list-check accent" aria-hidden="true"></i> Hazırlık</h2>
+        <h2 class="text-sm font-extrabold flex items-center gap-2"><i class="fa-solid fa-list-check accent" aria-hidden="true"></i> ${esc(T('check.title'))}</h2>
         <span class="text-[11px] font-bold muted">${n}/${CHECKLIST.length}</span>
       </div>
       <div class="h-1.5 rounded-full surface2 mb-3 overflow-hidden"><div class="h-full btn-accent" style="width:${Math.round(n / CHECKLIST.length * 100)}%"></div></div>
@@ -499,7 +530,7 @@
               <span class="text-sm flex-1 ${st.done ? 'line-through muted' : ''}">${esc(c.text)}</span>
               ${st.done && by ? avatar(by.id, 'w-5 h-5 text-[9px]') : ''}
             </button>
-            ${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener" class="w-9 h-9 shrink-0 rounded-lg inline-flex items-center justify-center accent" title="Bilet / rezervasyon sayfası" aria-label="${esc(c.text)} sayfası"><i class="fa-solid fa-arrow-up-right-from-square text-xs" aria-hidden="true"></i></a>` : ''}
+            ${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener" class="w-9 h-9 shrink-0 rounded-lg inline-flex items-center justify-center accent" title="${esc(T('check.linkTitle'))}" aria-label="${esc(c.text)} · ${esc(T('check.linkTitle'))}"><i class="fa-solid fa-arrow-up-right-from-square text-xs" aria-hidden="true"></i></a>` : ''}
           </div>`;
         }).join('')}
       </div>`).join('')}
@@ -508,7 +539,7 @@
 
   function renderPractical() {
     $('#practical').innerHTML = `<div class="surface rounded-2xl p-4">
-      <h2 class="text-sm font-extrabold mb-3 flex items-center gap-2"><i class="fa-solid fa-circle-info accent" aria-hidden="true"></i> Pratik bilgiler</h2>
+      <h2 class="text-sm font-extrabold mb-3 flex items-center gap-2"><i class="fa-solid fa-circle-info accent" aria-hidden="true"></i> ${esc(T('practical.title'))}</h2>
       <div class="space-y-3">${PRACTICAL.map(p => `<div class="flex gap-3">
         <i class="fa-solid ${p.icon} w-4 text-center terra mt-0.5" aria-hidden="true"></i>
         <div><p class="text-xs font-bold">${esc(p.title)}</p><p class="text-xs muted leading-snug">${esc(p.text)}</p></div>
@@ -538,7 +569,7 @@
           <div class="inline-block text-left px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${mine ? 'btn-accent rounded-tr-md' : 'surface2 rounded-tl-md'}">${esc(m.text)}</div>
         </div>
       </div>`;
-    }).join('') : '<p class="text-sm muted text-center py-8">İlk mesajı sen yaz 👋</p>';
+    }).join('') : `<p class="text-sm muted text-center py-8">${esc(T('chat.empty'))}</p>`;
     if (atBottom || !renderChat.didInit) box.scrollTop = box.scrollHeight;
     renderChat.didInit = true;
     updateChatBadge();
@@ -594,7 +625,7 @@
   function sheetHeader(title, sub) {
     return `<div class="px-5 pt-3 pb-3 flex items-start gap-3 border-b line">
       <div class="min-w-0 flex-1"><h2 class="text-lg font-extrabold leading-tight">${title}</h2>${sub ? `<p class="text-xs muted mt-0.5">${sub}</p>` : ''}</div>
-      <button data-action="close" class="w-9 h-9 shrink-0 rounded-full btn-ghost" aria-label="Kapat"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+      <button data-action="close" class="w-9 h-9 shrink-0 rounded-full btn-ghost" aria-label="${esc(T('sheet.close'))}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
     </div>`;
   }
 
@@ -605,24 +636,24 @@
     if (s.type === 'pick-activity') {
       if (!isUpdate) {
         const d = dayOf(s.day);
-        c.innerHTML = sheetHeader(`${esc(slotOf(s.slot).label)} slotuna ekle`, `${esc(d.title)} · ${slotOf(s.slot).start}–${slotOf(s.slot).end}`) + `
+        c.innerHTML = sheetHeader(esc(T('sheet.addTo', { slot: slotOf(s.slot).label })), `${esc(d.title)} · ${slotOf(s.slot).start}–${slotOf(s.slot).end}`) + `
           <div class="px-5 pt-3 space-y-2">
-            <input id="sheetSearch" data-autofocus type="search" placeholder="Ara…" value="${esc(state.poolQuery)}" class="w-full rounded-xl px-3 py-2.5 text-sm">
+            <input id="sheetSearch" data-autofocus type="search" placeholder="${esc(T('sheet.search'))}" value="${esc(state.poolQuery)}" class="w-full rounded-xl px-3 py-2.5 text-sm">
             <div id="sheetCats" class="flex gap-1.5 overflow-x-auto hide-scrollbar pb-1"></div>
           </div>
           <div id="sheetList" class="px-5 py-3 space-y-2 overflow-y-auto flex-1"></div>
-          <div class="px-5 py-3 border-t line pb-safe"><button data-action="custom" class="w-full h-11 rounded-xl btn-ghost text-sm font-bold"><i class="fa-solid fa-plus" aria-hidden="true"></i> Listede yok, kendi önerimi ekle</button></div>`;
+          <div class="px-5 py-3 border-t line pb-safe"><button data-action="custom" class="w-full h-11 rounded-xl btn-ghost text-sm font-bold"><i class="fa-solid fa-plus" aria-hidden="true"></i> ${esc(T('sheet.notListed'))}</button></div>`;
       }
       $('#sheetCats').innerHTML = catChipsHtml();
       const list = filteredActivities(s.slot);
-      $('#sheetList').innerHTML = list.length ? list.map(a => poolCard(a, s.slot)).join('') : '<p class="text-sm muted text-center py-6">Sonuç yok</p>';
+      $('#sheetList').innerHTML = list.length ? list.map(a => poolCard(a, s.slot)).join('') : `<p class="text-sm muted text-center py-6">${esc(T('pool.none'))}</p>`;
       return;
     }
     if (s.type === 'pick-slot') {
       const act = activity(s.act);
       const pickDay = s.pickDay || state.day;
-      const title = s.move ? 'Başka zamana taşı' : esc(act ? act.name : '');
-      c.innerHTML = sheetHeader(title, s.move ? esc(s.move.name) : 'Hangi gün ve saate eklensin?') + `
+      const title = s.move ? esc(T('sheet.move')) : esc(act ? act.name : '');
+      c.innerHTML = sheetHeader(title, s.move ? esc(s.move.name) : esc(T('sheet.whichSlot'))) + `
         <div class="px-5 py-4 space-y-4 overflow-y-auto pb-safe">
           <div class="flex gap-1.5 overflow-x-auto hide-scrollbar">${DAYS.map(d => `<button data-action="sheet-day" data-day="${d.key}" class="shrink-0 w-[52px] h-12 rounded-xl flex flex-col items-center justify-center leading-none ${d.key === pickDay ? 'btn-accent' : 'surface'}"><span class="text-[10px] font-bold">${d.short}</span><span class="text-base font-extrabold">${d.num}</span></button>`).join('')}</div>
           <div class="grid grid-cols-2 gap-2">${SLOTS.map(sl => {
@@ -630,7 +661,7 @@
             return `<button data-action="sheet-slot" data-slot="${sl.key}" ${closed ? 'disabled' : ''} class="rounded-xl p-3 text-left border ${sl.nap ? 'nap' : 'surface'} ${closed ? 'opacity-40' : 'hover:ring-accent'}">
               <span class="block text-sm font-extrabold ${sl.nap ? 'nap-ink' : ''}">${esc(sl.label)}</span>
               <span class="block text-[11px] muted">${closed ? esc(closed) : sl.start + '–' + sl.end}</span>
-              ${act && act.best.includes(sl.key) && !closed ? '<span class="tag btn-soft mt-1 inline-block">Uygun</span>' : ''}
+              ${act && act.best.includes(sl.key) && !closed ? `<span class="tag btn-soft mt-1 inline-block">${esc(T('sheet.fits'))}</span>` : ''}
             </button>`;
           }).join('')}</div>
         </div>`;
@@ -645,21 +676,23 @@
       const groups = item.groups || {};
       const key = esc(s.key);
       const desc = act.desc || '';
-      c.innerHTML = sheetHeader(esc(item.name), `${esc(dayOf(s.day).title)} · ${esc(slotOf(s.slot).label)} ${slotOf(s.slot).start}–${slotOf(s.slot).end}`) + `
+      const name = itemName(item);
+      const area = itemArea(item);
+      c.innerHTML = sheetHeader(esc(name), `${esc(dayOf(s.day).title)} · ${esc(slotOf(s.slot).label)} ${slotOf(s.slot).start}–${slotOf(s.slot).end}`) + `
         <div class="px-5 py-4 space-y-5 overflow-y-auto pb-safe">
           <div class="flex flex-wrap gap-1.5 items-center">
-            <span class="tag tag-${esc(item.cat || 'custom')}">${esc((catOf(item.cat) || { label: 'Ekip önerisi' }).label)}</span>
-            ${act.res ? '<span class="tag tag-res"><i class="fa-solid fa-ticket" aria-hidden="true"></i> Rezervasyon / bilet gerekli</span>' : ''}
-            ${item.area ? `<span class="text-xs muted">${esc(item.area)}</span>` : ''}
+            <span class="tag tag-${esc(item.cat || 'custom')}">${esc((catOf(item.cat) || { label: T('pool.teamIdea') }).label)}</span>
+            ${act.res ? `<span class="tag tag-res"><i class="fa-solid fa-ticket" aria-hidden="true"></i> ${esc(T('item.resNeeded'))}</span>` : ''}
+            ${area ? `<span class="text-xs muted">${esc(area)}</span>` : ''}
           </div>
           ${desc ? `<p class="text-sm leading-relaxed">${esc(desc)}</p>` : ''}
           <div class="flex flex-wrap gap-2">
-            ${act.url ? `<a href="${esc(act.url)}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-globe" aria-hidden="true"></i> Web sitesi</a>` : ''}
-            <a href="${esc(mapsFor({ name: item.name, addr: act.addr, area: item.area }))}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i> Haritada aç</a>
+            ${act.url ? `<a href="${esc(act.url)}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-globe accent" aria-hidden="true"></i> ${esc(T('link.web'))}</a>` : ''}
+            <a href="${esc(mapsFor({ name, addr: act.addr, area }))}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i> ${esc(T('link.mapOpen'))}</a>
           </div>
 
           <div>
-            <p class="text-xs font-bold muted mb-2">Oylar</p>
+            <p class="text-xs font-bold muted mb-2">${esc(T('detail.votes'))}</p>
             <div class="grid grid-cols-2 gap-2">
               <button data-action="vote" data-key="${key}" data-v="up" class="rounded-xl p-3 border line text-left ${t.mine === 'up' ? 'ring-accent' : ''}">
                 <span class="text-sm font-extrabold ok"><i class="fa-solid fa-thumbs-up" aria-hidden="true"></i> ${t.up.length}</span>
@@ -673,7 +706,7 @@
           </div>
 
           <div>
-            <p class="text-xs font-bold muted mb-2">Kim gidiyor?</p>
+            <p class="text-xs font-bold muted mb-2">${esc(T('detail.who'))}</p>
             <div class="grid grid-cols-3 gap-2">${Object.entries(GROUPS).map(([g, info]) => `
               <button data-action="group" data-g="${g}" class="rounded-xl p-2.5 border text-left ${groups[g] ? 'btn-soft ring-accent line' : 'line'}">
                 <span class="block text-sm font-extrabold">${g}</span>
@@ -683,46 +716,50 @@
 
           <div class="flex flex-col gap-2">
             <button data-action="confirm-item" class="h-12 rounded-xl text-sm font-bold ${item.confirmed ? 'btn-ghost' : 'btn-accent'}">
-              <i class="fa-solid ${item.confirmed ? 'fa-rotate-left' : 'fa-check'}" aria-hidden="true"></i> ${item.confirmed ? 'Kesinleşmeyi geri al' : 'Kesinleştir'}
+              <i class="fa-solid ${item.confirmed ? 'fa-rotate-left' : 'fa-check'}" aria-hidden="true"></i> ${esc(T(item.confirmed ? 'detail.unconfirm' : 'detail.confirm'))}
             </button>
             <div class="grid grid-cols-2 gap-2">
-              <button data-action="move" class="h-11 rounded-xl btn-ghost text-sm font-bold"><i class="fa-solid fa-arrows-up-down" aria-hidden="true"></i> Taşı</button>
-              <button data-action="remove" class="h-11 rounded-xl btn-ghost text-sm font-bold bad"><i class="fa-solid fa-trash-can" aria-hidden="true"></i> Kaldır</button>
+              <button data-action="move" class="h-11 rounded-xl btn-ghost text-sm font-bold"><i class="fa-solid fa-arrows-up-down" aria-hidden="true"></i> ${esc(T('detail.move'))}</button>
+              <button data-action="remove" class="h-11 rounded-xl btn-ghost text-sm font-bold bad"><i class="fa-solid fa-trash-can" aria-hidden="true"></i> ${esc(T('detail.remove'))}</button>
             </div>
           </div>
-          <p class="text-[11px] muted">${by ? `${esc(by.name)} ekledi` : ''}${item.addedAt ? ' · ' + new Date(item.addedAt).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</p>
+          <p class="text-[11px] muted">${by ? esc(T('detail.addedBy', { name: by.name })) : ''}${item.addedAt ? ' · ' + new Date(item.addedAt).toLocaleString(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</p>
         </div>`;
       return;
     }
     if (s.type === 'custom') {
       if (isUpdate) return;
-      c.innerHTML = sheetHeader('Kendi önerini ekle', s.slot ? `${esc(dayOf(s.day).title)} · ${esc(slotOf(s.slot).label)} slotuna da eklenecek` : 'Havuza eklenir, herkes görür') + `
+      const lbl = 'text-xs font-bold muted';
+      const inp = 'mt-1 w-full rounded-xl px-3 py-2.5 text-sm';
+      c.innerHTML = sheetHeader(esc(T('custom.title')), s.slot ? esc(T('custom.subSlot', { where: `${dayOf(s.day).title} · ${slotOf(s.slot).label}` })) : esc(T('custom.subPool'))) + `
         <form id="customForm" class="px-5 py-4 space-y-3 overflow-y-auto pb-safe">
-          <label class="block"><span class="text-xs font-bold muted">Ad *</span><input name="name" data-autofocus required maxlength="80" class="mt-1 w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Örn. Can Paixano"></label>
-          <label class="block"><span class="text-xs font-bold muted">Semt</span><input name="area" maxlength="60" class="mt-1 w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Örn. Barceloneta"></label>
-          <label class="block"><span class="text-xs font-bold muted">Kategori</span><select name="cat" class="mt-1 w-full rounded-xl px-3 py-2.5 text-sm">${CATEGORIES.map(c2 => `<option value="${c2.key}">${esc(c2.label)}</option>`).join('')}</select></label>
-          <label class="block"><span class="text-xs font-bold muted">Not</span><textarea name="desc" maxlength="300" rows="3" class="mt-1 w-full rounded-xl px-3 py-2.5 text-sm" placeholder="Neden güzel, ne zaman gidilmeli?"></textarea></label>
-          <button type="submit" class="w-full h-12 rounded-xl btn-accent text-sm font-bold">Ekle</button>
+          <label class="block"><span class="${lbl}">${esc(T('custom.name'))}</span><input name="name" data-autofocus required maxlength="80" class="${inp}" placeholder="${esc(T('custom.namePh'))}"></label>
+          <label class="block"><span class="${lbl}">${esc(T('custom.area'))}</span><input name="area" maxlength="60" class="${inp}" placeholder="${esc(T('custom.areaPh'))}"></label>
+          <label class="block"><span class="${lbl}">${esc(T('custom.cat'))}</span><select name="cat" class="${inp}">${CATEGORIES.map(c2 => `<option value="${c2.key}">${esc(c2.label)}</option>`).join('')}</select></label>
+          <label class="block"><span class="${lbl}">${esc(T('custom.note'))}</span><textarea name="desc" maxlength="300" rows="3" class="${inp}" placeholder="${esc(T('custom.notePh'))}"></textarea></label>
+          <button type="submit" class="w-full h-12 rounded-xl btn-accent text-sm font-bold">${esc(T('custom.submit'))}</button>
         </form>`;
       return;
     }
     if (s.type === 'confirm-me') {
+      // Onay ekranı seçilen kişinin dilinde gösterilir
       const p = person(s.id);
-      c.innerHTML = sheetHeader(`Sen ${esc(p.name)} misin?`, '') + `
+      const pl = p.lang || 'tr';
+      c.innerHTML = sheetHeader(esc(TL(pl, 'me.title', { name: p.name })), '') + `
         <div class="px-5 py-5 space-y-4 pb-safe">
-          <div class="flex items-center gap-3">${avatar(p.id, 'w-12 h-12 text-lg')}<p class="text-sm">Bu cihazda <strong>${esc(p.name)}</strong> olarak oy vereceksin. Seçim <strong>sonradan değiştirilemez</strong>.</p></div>
+          <div class="flex items-center gap-3">${avatar(p.id, 'w-12 h-12 text-lg')}<p class="text-sm">${TL(pl, 'me.body', { name: esc(p.name) })}</p></div>
           <div class="grid grid-cols-2 gap-2">
-            <button data-action="close" class="h-12 rounded-xl btn-ghost text-sm font-bold">Vazgeç</button>
-            <button data-action="confirm-me" data-id="${p.id}" class="h-12 rounded-xl btn-accent text-sm font-bold">Evet, benim</button>
+            <button data-action="close" class="h-12 rounded-xl btn-ghost text-sm font-bold">${esc(TL(pl, 'me.cancel'))}</button>
+            <button data-action="confirm-me" data-id="${p.id}" class="h-12 rounded-xl btn-accent text-sm font-bold">${esc(TL(pl, 'me.ok'))}</button>
           </div>
         </div>`;
       return;
     }
     if (s.type === 'invite') {
-      c.innerHTML = sheetHeader('Davet linki', 'Sadece ekip ile paylaş') + `
+      c.innerHTML = sheetHeader(esc(T('invite.title')), esc(T('invite.sub'))) + `
         <div class="px-5 py-5 space-y-3 pb-safe">
           <input readonly value="${esc(s.url)}" class="w-full rounded-xl px-3 py-2.5 text-xs" onfocus="this.select()">
-          <p class="text-xs muted">Linki uzun basıp kopyalayabilirsin.</p>
+          <p class="text-xs muted">${esc(T('invite.hint'))}</p>
         </div>`;
     }
   }
@@ -747,6 +784,7 @@
       if (!person(id)) return;
       state.me = id;
       LS.set(LS_USER, id);
+      setLang(person(id).lang || 'tr');
       const m = (D().members || {})[id];
       tripRef.child('members/' + id).set({
         joinedAt: (m && m.joinedAt) || firebase.database.ServerValue.TIMESTAMP,
@@ -789,12 +827,12 @@
     move: () => {
       const s = state.sheet;
       const item = slotItems(s.day, s.slot)[s.key];
-      openSheet({ type: 'pick-slot', act: item.activityId, pickDay: s.day, move: { day: s.day, slot: s.slot, key: s.key, name: item.name } });
+      openSheet({ type: 'pick-slot', act: item.activityId, pickDay: s.day, move: { day: s.day, slot: s.slot, key: s.key, name: itemName(item) } });
     },
     remove: () => {
       const s = state.sheet;
       const item = slotItems(s.day, s.slot)[s.key];
-      if (!item || !confirm(`"${item.name}" plandan kaldırılsın mı?`)) return;
+      if (!item || !confirm(T('detail.removeAsk', { name: itemName(item) }))) return;
       removeItem(s.day, s.slot, s.key);
       closeSheet();
     },
@@ -810,7 +848,7 @@
     invite: () => {
       const url = inviteUrl();
       if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(url).then(() => toast('Davet linki kopyalandı'), () => openSheet({ type: 'invite', url }));
+        navigator.clipboard.writeText(url).then(() => toast(T('toast.copied')), () => openSheet({ type: 'invite', url }));
       } else {
         openSheet({ type: 'invite', url });
       }
@@ -843,7 +881,7 @@
       const text = input.value.trim().slice(0, 500);
       if (!text || !tripRef) return;
       tripRef.child('discussions').push({ user: state.me, text, timestamp: firebase.database.ServerValue.TIMESTAMP })
-        .catch(err => toast('Gönderilemedi: ' + err.code));
+        .catch(err => toast(T('toast.sendFail', { e: err.code })));
       input.value = '';
     }
     if (e.target.id === 'customForm') {
@@ -862,8 +900,8 @@
         addedAt: firebase.database.ServerValue.TIMESTAMP
       }).then(() => {
         if (s && s.slot) setTimeout(() => addToSlot('custom:' + ref.key, s.day, s.slot), 300);
-        else toast('Havuza eklendi');
-      }).catch(err => toast('Kaydedilemedi: ' + err.code));
+        else toast(T('toast.poolAdded'));
+      }).catch(err => toast(T('toast.saveFail', { e: err.code })));
       closeSheet();
     }
   });
@@ -930,6 +968,10 @@
   }
 
   function init() {
+    const savedUser = LS.get(LS_USER);
+    state.me = person(savedUser) ? savedUser : null;
+    if (state.me) setLang(person(state.me).lang || 'tr');
+
     state.key = readTripKey();
     if (!state.key) { showGate(); return; }
 
@@ -937,20 +979,17 @@
       firebase.initializeApp(firebaseConfig);
       db = firebase.database();
     } catch (e) {
-      showGate('Veritabanına bağlanılamadı. Sayfayı yenile.');
+      showGate(T('gate.offline'));
       return;
     }
     tripRef = db.ref('trips/' + state.key);
-
-    const savedUser = LS.get(LS_USER);
-    state.me = person(savedUser) ? savedUser : null;
     state.day = todayKey() || 'day1';
 
     db.ref('.info/connected').on('value', snap => {
       const dot = $('#connDot');
       const ok = snap.val() === true;
       dot.className = 'w-2 h-2 rounded-full ' + (ok ? 'bg-emerald-500' : 'bg-amber-500');
-      dot.title = ok ? 'Canlı bağlı' : 'Bağlantı bekleniyor (değişiklikler sonra gönderilir)';
+      dot.title = T(ok ? 'conn.ok' : 'conn.wait');
     });
 
     // Ekran hemen çizilir, veri geldikçe güncellenir (yavaş bağlantıda boş sayfa olmasın)
@@ -967,9 +1006,7 @@
       state.loaded = true;
       if (state.me) renderAll(); else renderWhoami();
     }, err => {
-      showGate(err && err.code === 'PERMISSION_DENIED'
-        ? 'Bu davet linki geçersiz ya da erişim kapalı. Linki gruptan tekrar al.'
-        : 'Veritabanına bağlanılamadı. Sayfayı yenile.');
+      showGate(T(err && err.code === 'PERMISSION_DENIED' ? 'gate.denied' : 'gate.offline'));
     });
 
     // Slotlar "şimdi" vurgusu için dakikada bir tazelenir

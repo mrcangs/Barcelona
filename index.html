@@ -86,8 +86,8 @@
   <section id="gate" class="hidden min-h-screen flex items-center justify-center p-6">
     <div class="surface rounded-3xl p-8 max-w-sm text-center space-y-3 shadow-sm">
       <div class="w-14 h-14 mx-auto rounded-2xl btn-accent flex items-center justify-center text-xl"><i class="fa-solid fa-lock" aria-hidden="true"></i></div>
-      <h1 class="text-xl font-extrabold">Davet linki gerekli</h1>
-      <p id="gateMsg" class="text-sm muted">Bu planlayıcı sadece ekip içindir. WhatsApp grubundaki davet linkiyle aç.</p>
+      <h1 class="text-xl font-extrabold" data-i18n="gate.title">Davet linki gerekli</h1>
+      <p id="gateMsg" class="text-sm muted" data-i18n="gate.msg">Bu planlayıcı sadece ekip içindir. WhatsApp grubundaki davet linkiyle aç.</p>
     </div>
   </section>
 
@@ -98,6 +98,7 @@
         <div class="inline-flex items-center gap-2 text-xs font-bold btn-soft px-3 py-1 rounded-full"><i class="fa-solid fa-plane" aria-hidden="true"></i> Barselona · 11–16 Kasım 2026</div>
         <h1 class="text-2xl font-extrabold">Sen kimsin?</h1>
         <p class="text-sm muted">Oyların ve eklediklerin bu isimle görünecek. Seçim bu cihazda kalıcıdır, sonradan değiştirilemez.</p>
+        <p class="text-xs muted italic" lang="es">¿Quién eres? Elige tu nombre: la página se mostrará en tu idioma.</p>
       </div>
       <div id="whoamiGrid" class="grid grid-cols-2 gap-3"></div>
     </div>
@@ -116,8 +117,8 @@
         </div>
         <div class="flex items-center gap-2">
           <span id="connDot" class="w-2 h-2 rounded-full bg-slate-400" title="Bağlantı"></span>
-          <button data-action="invite" class="h-9 px-3 rounded-full btn-ghost text-xs font-bold flex items-center gap-1.5" aria-label="Davet linkini kopyala">
-            <i class="fa-solid fa-link" aria-hidden="true"></i><span class="hidden sm:inline">Davet linki</span>
+          <button data-action="invite" class="h-9 px-3 rounded-full btn-ghost text-xs font-bold flex items-center gap-1.5" aria-label="Davet linkini kopyala" data-i18n-aria="header.inviteAria">
+            <i class="fa-solid fa-link" aria-hidden="true"></i><span class="hidden sm:inline" data-i18n="header.invite">Davet linki</span>
           </button>
           <div id="meBadge" class="flex items-center gap-2"></div>
         </div>
@@ -130,15 +131,15 @@
       <aside data-panel="pool" class="hidden lg:block lg:col-span-3">
         <div class="lg:sticky lg:top-[72px] space-y-3">
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-extrabold">Mekan & Aktivite Havuzu</h2>
-            <button data-action="custom" class="text-xs font-bold accent flex items-center gap-1"><i class="fa-solid fa-plus" aria-hidden="true"></i> Kendi önerin</button>
+            <h2 class="text-sm font-extrabold" data-i18n="pool.title">Mekan & Aktivite Havuzu</h2>
+            <button data-action="custom" class="text-xs font-bold accent flex items-center gap-1"><i class="fa-solid fa-plus" aria-hidden="true"></i> <span data-i18n="pool.custom">Kendi önerin</span></button>
           </div>
           <div class="relative">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs muted" aria-hidden="true"></i>
-            <input id="poolSearch" type="search" placeholder="Ara: tapas, Gaudí, dondurma…" class="w-full rounded-xl pl-8 pr-3 py-2.5 text-sm">
+            <input id="poolSearch" type="search" placeholder="Ara: tapas, Gaudí, dondurma…" data-i18n-ph="pool.search" class="w-full rounded-xl pl-8 pr-3 py-2.5 text-sm">
           </div>
           <div id="poolCats" class="flex gap-1.5 overflow-x-auto hide-scrollbar"></div>
-          <p class="text-[11px] muted hidden lg:block">Kartı sürükleyip bir slota bırak ya da <i class="fa-solid fa-plus" aria-hidden="true"></i> ile ekle.</p>
+          <p class="text-[11px] muted hidden lg:block" data-i18n="pool.hint">Kartı sürükleyip bir slota bırak ya da + ile ekle.</p>
           <div id="poolList" class="space-y-2 lg:max-h-[calc(100vh-260px)] lg:overflow-y-auto lg:pr-1"></div>
         </div>
       </aside>
@@ -159,13 +160,13 @@
         <div data-panel="chat" class="hidden lg:block">
           <div class="surface rounded-2xl p-3 flex flex-col h-[calc(100vh-200px)] lg:h-[420px]">
             <div class="flex items-center justify-between px-1 pb-2 border-b line">
-              <h2 class="text-sm font-extrabold flex items-center gap-2"><i class="fa-solid fa-comments accent" aria-hidden="true"></i> Ekip sohbeti</h2>
-              <span class="text-[11px] muted">canlı</span>
+              <h2 class="text-sm font-extrabold flex items-center gap-2"><i class="fa-solid fa-comments accent" aria-hidden="true"></i> <span data-i18n="chat.title">Ekip sohbeti</span></h2>
+              <span class="text-[11px] muted" data-i18n="chat.live">canlı</span>
             </div>
             <div id="chatList" class="flex-1 overflow-y-auto py-3 space-y-2"></div>
             <form id="chatForm" class="flex gap-2 pt-2 border-t line">
-              <input id="chatInput" maxlength="500" autocomplete="off" placeholder="Fikir, saat önerisi, link…" class="flex-1 rounded-xl px-3 py-2.5 text-sm">
-              <button type="submit" class="w-11 h-11 rounded-xl btn-accent" aria-label="Gönder"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
+              <input id="chatInput" maxlength="500" autocomplete="off" placeholder="Fikir, saat önerisi, link…" data-i18n-ph="chat.placeholder" class="flex-1 rounded-xl px-3 py-2.5 text-sm">
+              <button type="submit" class="w-11 h-11 rounded-xl btn-accent" aria-label="Gönder" data-i18n-aria="chat.send"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
             </form>
           </div>
         </div>
@@ -181,10 +182,10 @@
     <!-- Mobil alt navigasyon -->
     <nav class="glass fixed bottom-0 inset-x-0 z-40 border-t line lg:hidden pb-safe">
       <div class="grid grid-cols-4 max-w-md mx-auto">
-        <button data-action="tab" data-tab="plan"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold"><i class="fa-solid fa-calendar-days text-base" aria-hidden="true"></i>Plan</button>
-        <button data-action="tab" data-tab="pool"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold"><i class="fa-solid fa-compass text-base" aria-hidden="true"></i>Havuz</button>
-        <button data-action="tab" data-tab="decide" class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold relative"><i class="fa-solid fa-square-check text-base" aria-hidden="true"></i>Kararlar<span id="decideBadge" class="hidden absolute top-2 right-[calc(50%-22px)] w-2 h-2 rounded-full bg-rose-500"></span></button>
-        <button data-action="tab" data-tab="chat"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold relative"><i class="fa-solid fa-comments text-base" aria-hidden="true"></i>Sohbet<span id="chatBadge" class="hidden absolute top-1.5 right-[calc(50%-26px)] min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] leading-[18px]"></span></button>
+        <button data-action="tab" data-tab="plan"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold"><i class="fa-solid fa-calendar-days text-base" aria-hidden="true"></i><span data-i18n="nav.plan">Plan</span></button>
+        <button data-action="tab" data-tab="pool"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold"><i class="fa-solid fa-compass text-base" aria-hidden="true"></i><span data-i18n="nav.pool">Havuz</span></button>
+        <button data-action="tab" data-tab="decide" class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold relative"><i class="fa-solid fa-square-check text-base" aria-hidden="true"></i><span data-i18n="nav.decide">Kararlar</span><span id="decideBadge" class="hidden absolute top-2 right-[calc(50%-22px)] w-2 h-2 rounded-full bg-rose-500"></span></button>
+        <button data-action="tab" data-tab="chat"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold relative"><i class="fa-solid fa-comments text-base" aria-hidden="true"></i><span data-i18n="nav.chat">Sohbet</span><span id="chatBadge" class="hidden absolute top-1.5 right-[calc(50%-26px)] min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] leading-[18px]"></span></button>
       </div>
     </nav>
   </div>
@@ -201,6 +202,7 @@
   <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-[60] hidden px-4 py-2.5 rounded-full btn-accent text-sm font-bold shadow-lg"></div>
 
   <script src="js/data.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

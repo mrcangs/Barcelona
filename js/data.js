@@ -7,7 +7,7 @@ const PEOPLE = [
   { id: 'atay',    name: 'Atay',    group: 'B', color: '#0891b2' },
   { id: 'alev',    name: 'Alev',    group: 'B', color: '#ea580c' },
   { id: 'cagatay', name: 'Çağatay', group: 'C', color: '#16a34a' },
-  { id: 'maribel', name: 'Maribel', group: 'C', color: '#9333ea' }
+  { id: 'maribel', name: 'Maribel', group: 'C', color: '#9333ea', lang: 'es' }
 ];
 
 const GROUPS = {
