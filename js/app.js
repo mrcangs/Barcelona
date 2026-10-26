@@ -35,7 +35,16 @@
   const toMin = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
   const pad = n => String(n).padStart(2, '0');
   const localDate = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const mapsUrl = (name, area) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${name} ${area || ''} Barcelona`);
+  const mapsUrl = (name, where) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(`${name}, ${where || ''}, Barcelona`);
+  const mapsFor = a => mapsUrl(a.name, a.addr || a.area);
+
+  // Kart içindeki web sitesi / harita kısayolları
+  function linkButtons(a) {
+    const cls = 'h-8 px-2.5 rounded-lg btn-ghost inline-flex items-center gap-1.5 text-xs font-bold';
+    const web = a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="${cls}" aria-label="${esc(a.name)} web sitesi"><i class="fa-solid fa-globe accent" aria-hidden="true"></i>Web sitesi</a>` : '';
+    const map = `<a href="${esc(mapsFor(a))}" target="_blank" rel="noopener" class="${cls}" aria-label="${esc(a.name)} Google Maps"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i>Harita</a>`;
+    return `<div class="flex flex-wrap gap-1.5 mt-2">${web}${map}</div>`;
+  }
 
   function avatar(id, size = 'w-7 h-7 text-[11px]') {
     const p = person(id);
@@ -413,8 +422,9 @@
           ${a.area ? `<span class="text-[11px] muted">${esc(a.area)}</span>` : ''}
         </div>
         <p class="text-xs muted mt-1 leading-snug">${esc(a.desc)}</p>
+        ${linkButtons(a)}
       </div>
-      ${targetSlot ? '<i class="fa-solid fa-plus accent self-center" aria-hidden="true"></i>'
+      ${targetSlot ? '<span class="self-start w-9 h-9 shrink-0 rounded-lg btn-soft inline-flex items-center justify-center"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>'
         : `<button data-action="pick-slot" data-act="${esc(a.id)}" class="self-start w-9 h-9 shrink-0 rounded-lg btn-soft" aria-label="${esc(a.name)} plana ekle"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>`}
     </div>`;
   }
@@ -483,11 +493,14 @@
         ${CHECKLIST.filter(c => c.cat === cat).map(c => {
           const st = done[c.id] || {};
           const by = person(st.by);
-          return `<button data-action="check" data-id="${c.id}" class="w-full flex items-center gap-2.5 py-2 text-left">
-            <span class="w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center ${st.done ? 'btn-accent border-transparent' : 'line'}">${st.done ? '<i class="fa-solid fa-check text-[10px]" aria-hidden="true"></i>' : ''}</span>
-            <span class="text-sm flex-1 ${st.done ? 'line-through muted' : ''}">${esc(c.text)}</span>
-            ${st.done && by ? avatar(by.id, 'w-5 h-5 text-[9px]') : ''}
-          </button>`;
+          return `<div class="flex items-center gap-1">
+            <button data-action="check" data-id="${c.id}" class="flex-1 min-w-0 flex items-center gap-2.5 py-2 text-left">
+              <span class="w-5 h-5 shrink-0 rounded-md border-2 flex items-center justify-center ${st.done ? 'btn-accent border-transparent' : 'line'}">${st.done ? '<i class="fa-solid fa-check text-[10px]" aria-hidden="true"></i>' : ''}</span>
+              <span class="text-sm flex-1 ${st.done ? 'line-through muted' : ''}">${esc(c.text)}</span>
+              ${st.done && by ? avatar(by.id, 'w-5 h-5 text-[9px]') : ''}
+            </button>
+            ${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener" class="w-9 h-9 shrink-0 rounded-lg inline-flex items-center justify-center accent" title="Bilet / rezervasyon sayfası" aria-label="${esc(c.text)} sayfası"><i class="fa-solid fa-arrow-up-right-from-square text-xs" aria-hidden="true"></i></a>` : ''}
+          </div>`;
         }).join('')}
       </div>`).join('')}
     </div>`;
@@ -553,6 +566,7 @@
     renderTeam();
     renderDecisions();
     renderChecklist();
+    renderPractical();
     renderChat();
     if (state.sheet) renderSheet(true);
   }
@@ -639,7 +653,10 @@
             ${item.area ? `<span class="text-xs muted">${esc(item.area)}</span>` : ''}
           </div>
           ${desc ? `<p class="text-sm leading-relaxed">${esc(desc)}</p>` : ''}
-          <a href="${mapsUrl(item.name, item.area)}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-bold accent"><i class="fa-solid fa-location-dot" aria-hidden="true"></i> Haritada aç</a>
+          <div class="flex flex-wrap gap-2">
+            ${act.url ? `<a href="${esc(act.url)}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-globe" aria-hidden="true"></i> Web sitesi</a>` : ''}
+            <a href="${esc(mapsFor({ name: item.name, addr: act.addr, area: item.area }))}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i> Haritada aç</a>
+          </div>
 
           <div>
             <p class="text-xs font-bold muted mb-2">Oylar</p>
@@ -801,6 +818,7 @@
   };
 
   document.addEventListener('click', e => {
+    if (e.target.closest('a[href]')) return; // dış linkler kartın kendi eylemini tetiklemesin
     const el = e.target.closest('[data-action]');
     if (!el || el.disabled) return;
     const fn = actions[el.dataset.action];
