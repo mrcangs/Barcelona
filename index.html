@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#f7f5f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+  <title>Barselona 2026 Planlayıcı</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%234f46e5'/><text x='50' y='66' font-size='44' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>BCN</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    :root {
+      --bg: #f7f5f2; --card: #ffffff; --card2: #f3f0eb; --line: #e6e1d9;
+      --ink: #1f2430; --muted: #6b7280; --accent: #4f46e5; --accent-soft: rgba(79,70,229,.10); --accent-ink: #ffffff;
+      --terra: #c2410c; --ok: #059669; --bad: #e11d48;
+      --nap: #fffaeb; --nap-line: #f6d78b; --nap-ink: #92400e;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1115; --card: #181b22; --card2: #20242d; --line: #2b303b;
+        --ink: #e9e7e4; --muted: #9ba1ab; --accent: #8b93ff; --accent-soft: rgba(139,147,255,.14); --accent-ink: #0f1115;
+        --terra: #fb923c; --ok: #34d399; --bad: #fb7185;
+        --nap: #231c10; --nap-line: #5c4512; --nap-ink: #fcd34d;
+      }
+    }
+    html { -webkit-text-size-adjust: 100%; }
+    body { background: var(--bg); color: var(--ink); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    .surface { background: var(--card); border: 1px solid var(--line); }
+    .surface2 { background: var(--card2); }
+    .line { border-color: var(--line); }
+    .muted { color: var(--muted); }
+    .accent { color: var(--accent); }
+    .terra { color: var(--terra); }
+    .btn-accent { background: var(--accent); color: var(--accent-ink); }
+    .btn-accent:hover { filter: brightness(1.08); }
+    .btn-soft { background: var(--accent-soft); color: var(--accent); }
+    .btn-ghost { background: var(--card2); color: var(--ink); }
+    .btn-ghost:hover { filter: brightness(.97); }
+    .nap { background: var(--nap); border-color: var(--nap-line); }
+    .nap-ink { color: var(--nap-ink); }
+    .ok { color: var(--ok); } .bad { color: var(--bad); }
+    .dashed { border: 1.5px dashed var(--line); }
+    .ring-accent { box-shadow: 0 0 0 2px var(--accent); }
+    .glass { background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .tag { font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+    .tag-food   { background: rgba(225,29,72,.10);  color: #be123c; }
+    .tag-coffee { background: rgba(217,119,6,.12);  color: #b45309; }
+    .tag-kids   { background: rgba(5,150,105,.12);  color: #047857; }
+    .tag-sight  { background: rgba(79,70,229,.10);  color: #4338ca; }
+    .tag-night  { background: rgba(147,51,234,.10); color: #7e22ce; }
+    .tag-sport  { background: rgba(234,88,12,.12);  color: #c2410c; }
+    .tag-custom { background: rgba(100,116,139,.14); color: #475569; }
+    .tag-res    { background: rgba(225,29,72,.10);  color: #be123c; }
+    @media (prefers-color-scheme: dark) {
+      .tag-food { color: #fda4af; } .tag-coffee { color: #fcd34d; } .tag-kids { color: #6ee7b7; }
+      .tag-sight { color: #a5b4fc; } .tag-night { color: #d8b4fe; } .tag-sport { color: #fdba74; }
+      .tag-custom { color: #cbd5e1; } .tag-res { color: #fda4af; }
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .drop-over { box-shadow: 0 0 0 2px var(--accent) inset; background: var(--accent-soft); }
+    .past { opacity: .55; }
+    .sheet-panel { transition: transform .22s ease; }
+    .sheet-hidden .sheet-panel { transform: translateY(100%); }
+    @media (min-width: 1024px) { .sheet-hidden .sheet-panel { transform: translateY(24px); opacity: 0; } }
+    .sheet-hidden { pointer-events: none; }
+    .sheet-hidden .sheet-backdrop { opacity: 0; }
+    .sheet-backdrop { transition: opacity .2s ease; }
+    .pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 8px); }
+    @media (prefers-reduced-motion: reduce) { .sheet-panel, .sheet-backdrop { transition: none; } }
+    button, [data-action] { -webkit-tap-highlight-color: transparent; }
+    input, textarea, select { background: var(--card); color: var(--ink); border: 1px solid var(--line); }
+    input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+  </style>
+</head>
+<body class="min-h-screen antialiased">
+
+  <!-- Davet linki olmadan giriş -->
+  <section id="gate" class="hidden min-h-screen flex items-center justify-center p-6">
+    <div class="surface rounded-3xl p-8 max-w-sm text-center space-y-3 shadow-sm">
+      <div class="w-14 h-14 mx-auto rounded-2xl btn-accent flex items-center justify-center text-xl"><i class="fa-solid fa-lock" aria-hidden="true"></i></div>
+      <h1 class="text-xl font-extrabold">Davet linki gerekli</h1>
+      <p id="gateMsg" class="text-sm muted">Bu planlayıcı sadece ekip içindir. WhatsApp grubundaki davet linkiyle aç.</p>
+    </div>
+  </section>
+
+  <!-- Sen kimsin? -->
+  <section id="whoami" class="hidden min-h-screen flex items-center justify-center p-5">
+    <div class="w-full max-w-md space-y-6">
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center gap-2 text-xs font-bold btn-soft px-3 py-1 rounded-full"><i class="fa-solid fa-plane" aria-hidden="true"></i> Barselona · 11–16 Kasım 2026</div>
+        <h1 class="text-2xl font-extrabold">Sen kimsin?</h1>
+        <p class="text-sm muted">Oyların ve eklediklerin bu isimle görünecek. Seçim bu cihazda kalıcıdır, sonradan değiştirilemez.</p>
+      </div>
+      <div id="whoamiGrid" class="grid grid-cols-2 gap-3"></div>
+    </div>
+  </section>
+
+  <!-- Uygulama -->
+  <div id="app" class="hidden">
+    <header class="glass sticky top-0 z-40 border-b line">
+      <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-9 h-9 shrink-0 rounded-xl btn-accent flex items-center justify-center font-extrabold text-[11px] tracking-wide">BCN</span>
+          <div class="min-w-0">
+            <h1 class="text-[15px] font-extrabold leading-tight truncate">Barselona 2026</h1>
+            <p id="countdown" class="text-[11px] muted leading-tight truncate"></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="connDot" class="w-2 h-2 rounded-full bg-slate-400" title="Bağlantı"></span>
+          <button data-action="invite" class="h-9 px-3 rounded-full btn-ghost text-xs font-bold flex items-center gap-1.5" aria-label="Davet linkini kopyala">
+            <i class="fa-solid fa-link" aria-hidden="true"></i><span class="hidden sm:inline">Davet linki</span>
+          </button>
+          <div id="meBadge" class="flex items-center gap-2"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 pt-4 pb-28 lg:pb-10 lg:grid lg:grid-cols-12 lg:gap-6">
+
+      <!-- HAVUZ (masaüstü sol kolon / mobil sekme) -->
+      <aside data-panel="pool" class="hidden lg:block lg:col-span-3">
+        <div class="lg:sticky lg:top-[72px] space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-extrabold">Mekan & Aktivite Havuzu</h2>
+            <button data-action="custom" class="text-xs font-bold accent flex items-center gap-1"><i class="fa-solid fa-plus" aria-hidden="true"></i> Kendi önerin</button>
+          </div>
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs muted" aria-hidden="true"></i>
+            <input id="poolSearch" type="search" placeholder="Ara: tapas, Gaudí, dondurma…" class="w-full rounded-xl pl-8 pr-3 py-2.5 text-sm">
+          </div>
+          <div id="poolCats" class="flex gap-1.5 overflow-x-auto hide-scrollbar"></div>
+          <p class="text-[11px] muted hidden lg:block">Kartı sürükleyip bir slota bırak ya da <i class="fa-solid fa-plus" aria-hidden="true"></i> ile ekle.</p>
+          <div id="poolList" class="space-y-2 lg:max-h-[calc(100vh-260px)] lg:overflow-y-auto lg:pr-1"></div>
+        </div>
+      </aside>
+
+      <!-- PLAN -->
+      <section data-panel="plan" class="lg:block lg:col-span-6 space-y-4">
+        <div class="glass sticky top-14 z-30 -mx-4 px-4 py-2 lg:mx-0 lg:px-0 lg:static lg:bg-transparent lg:backdrop-blur-0">
+          <div class="flex items-center gap-2">
+            <div id="dayChips" class="flex gap-1.5 overflow-x-auto hide-scrollbar flex-1"></div>
+            <button data-action="view" class="shrink-0 h-11 px-3 rounded-xl btn-ghost text-xs font-bold" id="viewToggle"></button>
+          </div>
+        </div>
+        <div id="planBody"></div>
+      </section>
+
+      <!-- KARARLAR / HAZIRLIK / SOHBET -->
+      <aside class="lg:col-span-3 space-y-4">
+        <div data-panel="decide" class="hidden lg:block space-y-4">
+          <div id="teamCard"></div>
+          <div id="decisions" class="space-y-3"></div>
+          <div id="checklist"></div>
+          <div id="practical"></div>
+        </div>
+        <div data-panel="chat" class="hidden lg:block">
+          <div class="surface rounded-2xl p-3 flex flex-col h-[calc(100vh-200px)] lg:h-[420px]">
+            <div class="flex items-center justify-between px-1 pb-2 border-b line">
+              <h2 class="text-sm font-extrabold flex items-center gap-2"><i class="fa-solid fa-comments accent" aria-hidden="true"></i> Ekip sohbeti</h2>
+              <span class="text-[11px] muted">canlı</span>
+            </div>
+            <div id="chatList" class="flex-1 overflow-y-auto py-3 space-y-2"></div>
+            <form id="chatForm" class="flex gap-2 pt-2 border-t line">
+              <input id="chatInput" maxlength="500" autocomplete="off" placeholder="Fikir, saat önerisi, link…" class="flex-1 rounded-xl px-3 py-2.5 text-sm">
+              <button type="submit" class="w-11 h-11 rounded-xl btn-accent" aria-label="Gönder"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
+            </form>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Mobil alt navigasyon -->
+    <nav class="glass fixed bottom-0 inset-x-0 z-40 border-t line lg:hidden pb-safe">
+      <div class="grid grid-cols-4 max-w-md mx-auto">
+        <button data-action="tab" data-tab="plan"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold"><i class="fa-solid fa-calendar-days text-base" aria-hidden="true"></i>Plan</button>
+        <button data-action="tab" data-tab="pool"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold"><i class="fa-solid fa-compass text-base" aria-hidden="true"></i>Havuz</button>
+        <button data-action="tab" data-tab="decide" class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold relative"><i class="fa-solid fa-square-check text-base" aria-hidden="true"></i>Kararlar<span id="decideBadge" class="hidden absolute top-2 right-[calc(50%-22px)] w-2 h-2 rounded-full bg-rose-500"></span></button>
+        <button data-action="tab" data-tab="chat"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold relative"><i class="fa-solid fa-comments text-base" aria-hidden="true"></i>Sohbet<span id="chatBadge" class="hidden absolute top-1.5 right-[calc(50%-26px)] min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] leading-[18px]"></span></button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Alt sayfa (mobil: bottom sheet, masaüstü: ortada modal) -->
+  <div id="sheet" class="sheet-hidden fixed inset-0 z-50 flex items-end lg:items-center justify-center" aria-hidden="true">
+    <div class="sheet-backdrop absolute inset-0 bg-black/40" data-action="close"></div>
+    <div class="sheet-panel relative w-full lg:max-w-lg max-h-[88vh] flex flex-col rounded-t-3xl lg:rounded-3xl surface shadow-2xl" role="dialog" aria-modal="true">
+      <div class="lg:hidden w-10 h-1.5 rounded-full bg-slate-300/70 mx-auto mt-2.5"></div>
+      <div id="sheetContent" class="flex flex-col min-h-0 flex-1"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-[60] hidden px-4 py-2.5 rounded-full btn-accent text-sm font-bold shadow-lg"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

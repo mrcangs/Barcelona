@@ -1,0 +1,13 @@
+# Kişisel bilgiler (koltuk no vb.) public repoya girmez
+barselona_*.md
+
+# Gizli davet anahtarı ve anahtarlı kurallar
+.trip-key
+database.rules.local.json
+
+# Lokal araçlar
+.auto-commit.log
+.claude/settings.local.json
+.vscode/
+.DS_Store
+Thumbs.db

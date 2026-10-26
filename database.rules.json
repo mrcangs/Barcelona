@@ -1,0 +1,60 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "trips": {
+      "__TRIP_KEY__": {
+        ".read": true,
+        ".write": true,
+        "members": {
+          "$p": {
+            ".validate": "$p.matches(/^(mertcan|elif|atay|alev|cagatay|maribel)$/)"
+          }
+        },
+        "slots": {
+          "$day": {
+            ".validate": "$day.matches(/^day[1-6]$/)",
+            "$slot": {
+              ".validate": "$slot.matches(/^(morning|lunch_nap|afternoon|evening)$/)",
+              "$item": {
+                ".validate": "newData.hasChildren(['activityId', 'name', 'addedBy']) && newData.child('name').isString() && newData.child('name').val().length <= 120 && newData.child('addedBy').val().matches(/^(mertcan|elif|atay|alev|cagatay|maribel)$/)"
+              }
+            }
+          }
+        },
+        "slot_votes": {
+          "$item": {
+            "$p": {
+              ".validate": "$p.matches(/^(mertcan|elif|atay|alev|cagatay|maribel)$/) && newData.isString() && newData.val().matches(/^(up|down)$/)"
+            }
+          }
+        },
+        "decisions": {
+          "$dec": {
+            "$p": {
+              ".validate": "$p.matches(/^(mertcan|elif|atay|alev|cagatay|maribel)$/) && newData.isString() && newData.val().length <= 40"
+            }
+          }
+        },
+        "custom_activities": {
+          "$id": {
+            ".validate": "newData.hasChildren(['name', 'addedBy']) && newData.child('name').isString() && newData.child('name').val().length <= 80 && (!newData.child('desc').exists() || newData.child('desc').val().length <= 300)"
+          }
+        },
+        "checklist": {
+          "$id": {
+            ".validate": "newData.hasChildren(['done', 'by'])"
+          }
+        },
+        "discussions": {
+          "$msg": {
+            ".validate": "newData.hasChildren(['user', 'text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 500 && newData.child('user').val().matches(/^(mertcan|elif|atay|alev|cagatay|maribel)$/)"
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
