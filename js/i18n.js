@@ -174,6 +174,7 @@ const CONTENT_ES = {
     madmad:     { desc: 'Hamburguesería 100% vegetal. Abierto todos los días desde las 12:30 hasta tarde.' },
     hofmann:    { desc: 'El famoso cruasán de mascarpone. Premio de la tarde cuando Demir se despierta.' },
     lapapa:     { area: 'Varias tiendas', desc: 'Cocina casera de día y café de especialidad; desayuno/brunch. Locales: Gran de Gràcia 127, Trafalgar 56, Aribau 92, Pau Claris 190. El mapa muestra el más cercano.' },
+    brunchcake: { desc: 'Justo enfrente de la Sagrada Família, cadena de brunch famosa por sus platos espectaculares. Todos los días 09:00–16:30 (vie–dom 17:00). Ideal antes o después de la visita.' },
     faire:      { desc: 'Brunch vegetariano: pancakes, tostada de masa madre con aguacate, buen café. Acepta pocas reservas al día.' },
     nomad:      { desc: 'El mejor tostador de café de especialidad de la ciudad; shaked espresso.' },
     funky:      { desc: 'Babka, galletas de chocolate con sal y desayunos. (El "Eatery" con mesas está en el Eixample, Bailèn 61.)' },
