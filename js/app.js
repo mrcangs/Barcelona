@@ -565,7 +565,7 @@
       return `<div class="flex gap-2 ${mine ? 'flex-row-reverse' : ''}">
         ${mine ? '' : avatar(m.user)}
         <div class="max-w-[80%] ${mine ? 'text-right' : ''}">
-          <div class="text-[10px] muted mb-0.5">${mine ? '' : esc(p ? p.name : m.user) + ' · '}${when}</div>
+          <div class="text-[10px] muted mb-0.5">${mine ? '' : esc(p ? p.name : (FORMER_PEOPLE[m.user] || m.user)) + ' · '}${when}</div>
           <div class="inline-block text-left px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${mine ? 'btn-accent rounded-tr-md' : 'surface2 rounded-tl-md'}">${esc(m.text)}</div>
         </div>
       </div>`;
@@ -707,7 +707,7 @@
 
           <div>
             <p class="text-xs font-bold muted mb-2">${esc(T('detail.who'))}</p>
-            <div class="grid grid-cols-3 gap-2">${Object.entries(GROUPS).map(([g, info]) => `
+            <div class="grid grid-cols-2 gap-2">${Object.entries(GROUPS).map(([g, info]) => `
               <button data-action="group" data-g="${g}" class="rounded-xl p-2.5 border text-left ${groups[g] ? 'btn-soft ring-accent line' : 'line'}">
                 <span class="block text-sm font-extrabold">${g}</span>
                 <span class="block text-[10px] muted leading-tight">${esc(info.who.split(',')[0])}…</span>

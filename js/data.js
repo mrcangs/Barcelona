@@ -5,15 +5,16 @@ const PEOPLE = [
   { id: 'mertcan', name: 'Mertcan', group: 'A', color: '#4f46e5' },
   { id: 'elif',    name: 'Elif',    group: 'A', color: '#db2777' },
   { id: 'atay',    name: 'Atay',    group: 'B', color: '#0891b2' },
-  { id: 'alev',    name: 'Alev',    group: 'B', color: '#ea580c' },
-  { id: 'cagatay', name: 'Çağatay', group: 'C', color: '#16a34a' },
-  { id: 'maribel', name: 'Maribel', group: 'C', color: '#9333ea', lang: 'es' }
+  { id: 'alev',    name: 'Alev',    group: 'B', color: '#ea580c' }
+  // İspanyolca arayüz isteyen biri eklenirse: lang: 'es'
 ];
+
+// Ekipten ayrılanlar: eski sohbet mesajlarında adları doğru görünsün diye
+const FORMER_PEOPLE = { cagatay: 'Çağatay', maribel: 'Maribel' };
 
 const GROUPS = {
   A: { label: 'Grup A', who: 'Mertcan, Elif, Demir (3)', note: '07:00 kalkış, 12:30–15:00 otelde öğle uykusu, 21:00 sakinleşme.' },
-  B: { label: 'Grup B', who: 'Atay, Alev, Keremacar (7)', note: 'Uyku yok; bilim, futbol, park, kano enerjisi.' },
-  C: { label: 'Grup C', who: 'Çağatay, Maribel (Per–Paz)', note: 'Amsterdam çıkışlı; kokteyl barları, 3. nesil kahve, geç akşam yemeği.' }
+  B: { label: 'Grup B', who: 'Atay, Alev, Keremacar (7)', note: 'Uyku yok; bilim, futbol, park, kano enerjisi.' }
 };
 
 const SLOTS = [
@@ -25,10 +26,10 @@ const SLOTS = [
 
 const DAYS = [
   { key: 'day1', date: '2026-11-11', short: 'Çar', num: 11, title: '11 Kasım Çarşamba',  desc: 'Varış günü · otele yerleşme ve yakın çevre', closed: { morning: 'Uçuş ve transfer' } },
-  { key: 'day2', date: '2026-11-12', short: 'Per', num: 12, title: '12 Kasım Perşembe',  desc: 'Çağatay & Maribel geliyor · HYROX Relay seçilirse akşam yarış' },
+  { key: 'day2', date: '2026-11-12', short: 'Per', num: 12, title: '12 Kasım Perşembe',  desc: 'Şehri keşif günü · HYROX Relay seçilirse akşam yarış' },
   { key: 'day3', date: '2026-11-13', short: 'Cum', num: 13, title: '13 Kasım Cuma',      desc: 'Tüm ekip birlikte · kültür, park, gurme tapas' },
   { key: 'day4', date: '2026-11-14', short: 'Cmt', num: 14, title: '14 Kasım Cumartesi', desc: 'Sahil, alışveriş ve büyük akşam buluşması' },
-  { key: 'day5', date: '2026-11-15', short: 'Paz', num: 15, title: '15 Kasım Pazar',     desc: 'HYROX Doubles seçilirse sabah yarış · Çağatay & Maribel dönüyor' },
+  { key: 'day5', date: '2026-11-15', short: 'Paz', num: 15, title: '15 Kasım Pazar',     desc: 'HYROX Doubles seçilirse sabah yarış · son tam gün' },
   { key: 'day6', date: '2026-11-16', short: 'Pzt', num: 16, title: '16 Kasım Pazartesi', desc: 'Dönüş günü', closed: { lunch_nap: 'Dönüş uçuşu', afternoon: 'İstanbul 17:55', evening: 'Evdeyiz' } }
 ];
 
@@ -45,7 +46,7 @@ const CATEGORIES = [
 // url: resmi site (Ekim 2026'da kontrol edildi; bulunamayanlarda yok) · addr: Google Maps araması için adres
 const POOL = [
   { id: 'canete',     name: 'Bar Cañete',                 cat: 'food',   area: 'El Raval',          addr: 'Carrer de la Unió 17',            url: 'https://barcanete.com/',           icon: 'fa-utensils',        res: true,  kid: false, best: ['evening'],               desc: 'Üst düzey tapas barı: deniz ürünleri, biftek tartarlı brioche. Kalabalık akşam için erken rezervasyon şart.' },
-  { id: 'nacional',   name: 'El Nacional',                cat: 'food',   area: 'Passeig de Gràcia', addr: 'Passeig de Gràcia 24 Bis',        url: 'https://www.elnacionalbcn.com/',   icon: 'fa-wine-glass',      res: true,  kid: true,  best: ['evening', 'lunch_nap'],  desc: '8 kişilik grubun çocuklarla en ferah oturabileceği tarihi gastronomi sarayı.' },
+  { id: 'nacional',   name: 'El Nacional',                cat: 'food',   area: 'Passeig de Gràcia', addr: 'Passeig de Gràcia 24 Bis',        url: 'https://www.elnacionalbcn.com/',   icon: 'fa-wine-glass',      res: true,  kid: true,  best: ['evening', 'lunch_nap'],  desc: '6 kişilik grubun çocuklarla en ferah oturabileceği tarihi gastronomi sarayı.' },
   { id: 'boqueria',   name: 'Mercat de la Boqueria',      cat: 'food',   area: 'La Rambla',         addr: 'La Rambla 91',                    url: 'https://www.boqueria.barcelona/',  icon: 'fa-basket-shopping', res: false, kid: true,  best: ['morning'],               desc: 'Sabah erken: taze meyve suları, jambon, Pinotxo / El Quim tezgah tapasları.' },
   { id: 'pizzalocal', name: 'Pizza Local',                cat: 'food',   area: 'El Born',           addr: "Carrer de l'Argenteria 27",       icon: 'fa-pizza-slice',     res: false, kid: true,  best: ['evening'],               desc: 'Ekşi mayalı pizza, glütensiz seçenek. Demir ve Keremacar için hızlı, stressiz akşam kurtarıcısı.' },
   { id: 'malvon',     name: 'Empanadas Malvón',           cat: 'food',   area: 'Birden fazla şube', addr: 'Empanadas Malvón',                url: 'https://www.malvon.es/es',         icon: 'fa-cookie',          res: false, kid: true,  best: ['afternoon', 'evening'],  desc: 'Yürürken elde yenen sıcak Arjantin empanadaları; kriz önleyici atıştırmalık. Haritada en yakın şube çıkar.' },
@@ -80,12 +81,6 @@ const FIXED_EVENTS = {
       { time: '12:15', title: 'Otele check-in, bavulları bırak', icon: 'fa-hotel' }
     ]
   },
-  day2: {
-    morning: [ { time: 'Gün içi', title: 'Çağatay & Maribel Amsterdam\'dan geliyor', icon: 'fa-plane-arrival' } ]
-  },
-  day5: {
-    afternoon: [ { time: 'Akşamüstü', title: 'Çağatay & Maribel\'i Amsterdam\'a uğurlama', icon: 'fa-hand' } ]
-  },
   day6: {
     morning: [
       { time: '08:30', title: 'Kahvaltı + Hofmann\'dan paket kruvasan', icon: 'fa-bread-slice' },
@@ -102,7 +97,7 @@ const DECISIONS = [
     id: 'hyrox', title: 'HYROX formatı', icon: 'fa-dumbbell',
     desc: 'Fira Gran Via. Hangi senaryo takvime girsin?',
     options: [
-      { id: 'relay',   label: 'Perşembe Relay',  sub: '12 Kas akşam · Mertcan, Atay, Çağatay + 4. kişi · çıkışta 8 kişilik tapas kutlaması' },
+      { id: 'relay',   label: 'Perşembe Relay',  sub: '12 Kas akşam · Mertcan, Atay + 2 kişi daha bulunmalı · çıkışta ekipçe tapas kutlaması' },
       { id: 'doubles', label: 'Pazar Doubles',   sub: '15 Kas sabah · Mertcan & Atay · aileler Park Güell / sahil, öğlen La Pepita kutlaması' }
     ]
   },
@@ -110,7 +105,7 @@ const DECISIONS = [
     id: 'big_dinner', title: 'Cumartesi büyük akşam', icon: 'fa-champagne-glasses',
     desc: '14 Kasım akşamı tüm ekip nerede?',
     options: [
-      { id: 'nacional', label: 'El Nacional',  sub: '8 kişi, çocuklarla rahat, ferah salon' },
+      { id: 'nacional', label: 'El Nacional',  sub: '6 kişi, çocuklarla rahat, ferah salon' },
       { id: 'gatsby',   label: 'Gatsby',       sub: 'Yetişkin dinner-show; çocuklar için bakıcı/nöbet gerekir' },
       { id: 'both',     label: 'İkisi de',     sub: 'Erken El Nacional, sonra yetişkinler Gatsby / Dry Martini' }
     ]
@@ -134,19 +129,19 @@ const SUGGESTED_PLAN = {
     morning:   [ { id: 'boqueria' } ],
     lunch_nap: [ { id: 'cosmocaixa', who: 'B' } ],
     afternoon: [ { id: 'barceloneta' }, { id: 'fritas' } ],
-    evening:   [ { id: 'succulent', when: 'relay', note: 'Yarış sonrası 8 kişilik kutlama' }, { id: 'canete', when: '!relay' } ]
+    evening:   [ { id: 'succulent', when: 'relay', note: 'Yarış sonrası ekipçe kutlama' }, { id: 'canete', when: '!relay' } ]
   },
   day3: {
     morning:   [ { id: 'sagrada' } ],
     lunch_nap: [ { id: 'zoo', who: 'B' } ],
     afternoon: [ { id: 'ciutadella', note: 'Kayık turu' }, { id: 'campana' } ],
-    evening:   [ { id: 'canete', when: 'relay' }, { id: 'stravinsky', who: 'C', note: 'Yemek sonrası yetişkinler' } ]
+    evening:   [ { id: 'canete', when: 'relay' }, { id: 'stravinsky', note: 'Yemek sonrası yetişkinler' } ]
   },
   day4: {
-    morning:   [ { id: 'faire' }, { id: 'nomad', who: 'C' } ],
+    morning:   [ { id: 'faire' }, { id: 'nomad' } ],
     lunch_nap: [ { id: 'campnou', who: 'B' } ],
     afternoon: [ { id: 'zoo' } ],
-    evening:   [ { id: 'nacional', note: '8 kişi büyük akşam' }, { id: 'gatsby', note: 'Yetişkinler, çocuklar uyuduktan sonra' } ]
+    evening:   [ { id: 'nacional', note: 'Ekipçe büyük akşam' }, { id: 'gatsby', note: 'Yetişkinler, çocuklar uyuduktan sonra' } ]
   },
   day5: {
     morning:   [ { id: 'guell', when: 'doubles', note: 'Aileler, yarış sürerken' }, { id: 'funky', when: '!doubles' } ],
@@ -164,10 +159,10 @@ const CHECKLIST = [
   { id: 'zoo',       text: 'Zoo online bilet', cat: 'Bilet', url: 'https://zoobarcelona.cat/en/tickets' },
   { id: 'campnou',   text: 'Camp Nou turu (açık mı kontrol)', cat: 'Bilet', url: 'https://www.fcbarcelona.com/en/tickets/camp-nou-experience' },
   { id: 'canete',    text: 'Bar Cañete rezervasyonu', cat: 'Rezervasyon', url: 'https://barcanete.com/' },
-  { id: 'nacional',  text: 'El Nacional 8 kişilik masa', cat: 'Rezervasyon', url: 'https://www.elnacionalbcn.com/' },
+  { id: 'nacional',  text: 'El Nacional 6 kişilik masa', cat: 'Rezervasyon', url: 'https://www.elnacionalbcn.com/' },
   { id: 'succulent', text: 'Suculent rezervasyonu (hafta sonu kapalı)', cat: 'Rezervasyon', url: 'https://suculent.com/' },
   { id: 'gatsby',    text: 'Gatsby show rezervasyonu', cat: 'Rezervasyon', url: 'https://gatsbybarcelona.com/' },
-  { id: 'hyrox',     text: 'HYROX kaydı (+ Relay ise 4. kişi)', cat: 'HYROX', url: 'https://hyrox.com/event/hyrox-barcelona-2/' },
+  { id: 'hyrox',     text: 'HYROX kaydı (Relay ise 2 kişi daha bul)', cat: 'HYROX', url: 'https://hyrox.com/event/hyrox-barcelona-2/' },
   { id: 'transfer1', text: '11 Kas havalimanı → otel transferi (taksi / Aerobús)', cat: 'Ulaşım', url: 'https://aerobusbarcelona.es/en/' },
   { id: 'transfer2', text: '16 Kas 09:30 otel → havalimanı transferi', cat: 'Ulaşım', url: 'https://aerobusbarcelona.es/en/' },
   { id: 'tcasual',   text: 'T-Casual (10 biniş, 13 €) / Hola BCN kartı', cat: 'Ulaşım', url: 'https://www.tmb.cat/en/barcelona-fares-metro-bus/t-casual' },

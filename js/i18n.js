@@ -145,10 +145,10 @@ const UI = {
 const CONTENT_ES = {
   days: {
     day1: { short: 'Mié', title: 'Miércoles, 11 de noviembre', desc: 'Día de llegada · instalarse en el hotel y alrededores', closed: { morning: 'Vuelo y traslado' } },
-    day2: { short: 'Jue', title: 'Jueves, 12 de noviembre', desc: 'Llegan Çağatay y Maribel · si gana el Relay, HYROX por la noche' },
+    day2: { short: 'Jue', title: 'Jueves, 12 de noviembre', desc: 'Día para descubrir la ciudad · si gana el Relay, HYROX por la noche' },
     day3: { short: 'Vie', title: 'Viernes, 13 de noviembre', desc: 'Todo el grupo junto · cultura, parque y tapas gourmet' },
     day4: { short: 'Sáb', title: 'Sábado, 14 de noviembre', desc: 'Playa, compras y gran cena de grupo' },
-    day5: { short: 'Dom', title: 'Domingo, 15 de noviembre', desc: 'Si ganan los Doubles, HYROX por la mañana · Çağatay y Maribel vuelven' },
+    day5: { short: 'Dom', title: 'Domingo, 15 de noviembre', desc: 'Si ganan los Doubles, HYROX por la mañana · último día completo' },
     day6: { short: 'Lun', title: 'Lunes, 16 de noviembre', desc: 'Día de regreso', closed: { lunch_nap: 'Vuelo de vuelta', afternoon: 'Estambul 17:55', evening: 'En casa' } }
   },
   slots: {
@@ -160,12 +160,11 @@ const CONTENT_ES = {
   categories: { food: 'Comida', coffee: 'Café y dulces', kids: 'Niños y familia', sight: 'Visitas', night: 'Noche', sport: 'Deporte' },
   groups: {
     A: { label: 'Grupo A', who: 'Mertcan, Elif, Demir (3)', note: 'Se levantan a las 7:00, siesta de 12:30 a 15:00 en el hotel, calma a partir de las 21:00.' },
-    B: { label: 'Grupo B', who: 'Atay, Alev, Keremacar (7)', note: 'Sin siesta; ciencia, fútbol, parque y barcas.' },
-    C: { label: 'Grupo C', who: 'Çağatay, Maribel (jue–dom)', note: 'Desde Ámsterdam; coctelerías, café de especialidad y cenas tardías.' }
+    B: { label: 'Grupo B', who: 'Atay, Alev, Keremacar (7)', note: 'Sin siesta; ciencia, fútbol, parque y barcas.' }
   },
   pool: {
     canete:     { desc: 'Barra de tapas de alto nivel: marisco, brioche de steak tartar. Para una cena de grupo, reservar con mucha antelación.' },
-    nacional:   { desc: 'Palacio gastronómico histórico; el sitio más amplio para que los 8 estemos cómodos con niños.' },
+    nacional:   { desc: 'Palacio gastronómico histórico; el sitio más amplio para que los 6 estemos cómodos con niños.' },
     boqueria:   { desc: 'A primera hora: zumos frescos, jamón y tapas de barra en Pinotxo / El Quim.' },
     pizzalocal: { desc: 'Pizza de masa madre, opción sin gluten. Solución rápida y sin estrés para Demir y Keremacar.' },
     malvon:     { area: 'Varias tiendas', desc: 'Empanadas argentinas calientes para comer andando; snack anti-crisis. El mapa muestra la tienda más cercana.' },
@@ -195,8 +194,6 @@ const CONTENT_ES = {
       { title: 'TK1853 IST → BCN (llegada 10:55)' },
       { title: 'Traslado del aeropuerto al hotel' },
       { title: 'Check-in en el hotel, dejar las maletas' } ] },
-    day2: { morning: [ { time: 'Durante el día', title: 'Çağatay y Maribel llegan desde Ámsterdam' } ] },
-    day5: { afternoon: [ { time: 'Al atardecer', title: 'Despedida de Çağatay y Maribel (vuelta a Ámsterdam)' } ] },
     day6: { morning: [
       { title: 'Desayuno + cruasanes para llevar de Hofmann' },
       { title: 'Salida del hotel' },
@@ -206,10 +203,10 @@ const CONTENT_ES = {
   hyroxEvent: { relay: { time: 'Noche' }, doubles: { time: 'Mañana' } },
   decisions: {
     hyrox: { title: 'Formato HYROX', desc: 'Fira Gran Via. ¿Qué escenario va al calendario?', options: {
-      relay:   { label: 'Relay del jueves', sub: '12 nov por la noche · Mertcan, Atay, Çağatay + 4.ª persona · tapas para 8 al terminar' },
+      relay:   { label: 'Relay del jueves', sub: '12 nov por la noche · Mertcan, Atay + faltan 2 personas · tapas en grupo al terminar' },
       doubles: { label: 'Doubles del domingo', sub: '15 nov por la mañana · Mertcan y Atay · familias en Park Güell / playa, celebración en La Pepita a mediodía' } } },
     big_dinner: { title: 'Gran cena del sábado', desc: '¿Dónde estamos todos la noche del 14 de noviembre?', options: {
-      nacional: { sub: '8 personas, cómodo con niños, sala amplia' },
+      nacional: { sub: '6 personas, cómodo con niños, sala amplia' },
       gatsby:   { sub: 'Dinner-show para adultos; hace falta canguro o turnos para los niños' },
       both:     { label: 'Las dos', sub: 'Primero El Nacional, luego los adultos a Gatsby / Dry Martini' } } }
   },
@@ -217,10 +214,10 @@ const CONTENT_ES = {
     'Demir uyurken Atay, Alev & Keremacar': 'Atay, Alev y Keremacar mientras Demir duerme',
     'Uyanış ödülü + El Born turu': 'Premio al despertar + paseo por El Born',
     'Yolculuk günü: hızlı ve stressiz': 'Día de viaje: rápido y sin estrés',
-    'Yarış sonrası 8 kişilik kutlama': 'Celebración para 8 después de la carrera',
+    'Yarış sonrası ekipçe kutlama': 'Celebración en grupo después de la carrera',
     'Kayık turu': 'Paseo en barca',
     'Yemek sonrası yetişkinler': 'Adultos, después de cenar',
-    '8 kişi büyük akşam': 'Gran cena para 8',
+    'Ekipçe büyük akşam': 'Gran cena de grupo',
     'Yetişkinler, çocuklar uyuduktan sonra': 'Adultos, cuando los niños duerman',
     'Aileler, yarış sürerken': 'Familias, mientras dura la carrera',
     'Madalya kutlaması / Gràcia': 'Celebración con medallas / Gràcia',
@@ -234,10 +231,10 @@ const CONTENT_ES = {
     zoo: 'Entrada online al Zoo',
     campnou: 'Tour del Camp Nou (comprobar qué está abierto)',
     canete: 'Reserva en Bar Cañete',
-    nacional: 'Mesa para 8 en El Nacional',
+    nacional: 'Mesa para 6 en El Nacional',
     succulent: 'Reserva en Suculent (cerrado el fin de semana)',
     gatsby: 'Reserva del show de Gatsby',
-    hyrox: 'Inscripción HYROX (+ 4.ª persona si es Relay)',
+    hyrox: 'Inscripción HYROX (si es Relay, buscar 2 personas más)',
     transfer1: '11 nov: traslado aeropuerto → hotel (taxi / Aerobús)',
     transfer2: '16 nov 09:30: traslado hotel → aeropuerto',
     tcasual: 'T-casual (10 viajes, 13 €) / tarjeta Hola BCN',
