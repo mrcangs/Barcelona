@@ -7,7 +7,7 @@ Statik site (build yok) + Firebase Realtime Database.
 - **Plan**: 6 gün × 4 slot (Sabah · Öğle & Demir uykusu · İkindi · Akşam) dikey zaman çizelgesi. Sabit kartlar (uçuşlar, transfer, HYROX), rehberden gelen **öneri** kartları (tek dokunuşla eklenir), "Şimdi" vurgusu.
 - **Havuz**: rehberdeki tüm mekanlar + ekibin eklediği öneriler. Arama, kategori filtresi, rezervasyon rozeti. Masaüstünde sürükle-bırak.
 - **Kart detayı**: 👍/👎 oy (kim ne verdi), "Kim gidiyor?" (Grup A/B), Kesinleştir, Taşı, Kaldır, Haritada aç.
-- **Kararlar**: HYROX Relay / Doubles (kazanan takvime işlenir), Cumartesi büyük akşam.
+- **Kararlar**: Cumartesi büyük akşam oylaması. HYROX Doubles Pazar sabahı takvimde sabit.
 - **Hazırlık listesi**: bilet ve rezervasyonlar, kimin işaretlediği görünür.
 - **Sohbet**: canlı, okunmamış rozeti.
 - **Özet**: tüm günler tek ekranda.

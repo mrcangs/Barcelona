@@ -26,10 +26,10 @@ const SLOTS = [
 
 const DAYS = [
   { key: 'day1', date: '2026-11-11', short: 'Çar', num: 11, title: '11 Kasım Çarşamba',  desc: 'Varış günü · otele yerleşme ve yakın çevre', closed: { morning: 'Uçuş ve transfer' } },
-  { key: 'day2', date: '2026-11-12', short: 'Per', num: 12, title: '12 Kasım Perşembe',  desc: 'Şehri keşif günü · HYROX Relay seçilirse akşam yarış' },
+  { key: 'day2', date: '2026-11-12', short: 'Per', num: 12, title: '12 Kasım Perşembe',  desc: 'Şehri keşif günü · pazar, Boqueria ve sahil' },
   { key: 'day3', date: '2026-11-13', short: 'Cum', num: 13, title: '13 Kasım Cuma',      desc: 'Tüm ekip birlikte · kültür, park, gurme tapas' },
   { key: 'day4', date: '2026-11-14', short: 'Cmt', num: 14, title: '14 Kasım Cumartesi', desc: 'Sahil, alışveriş ve büyük akşam buluşması' },
-  { key: 'day5', date: '2026-11-15', short: 'Paz', num: 15, title: '15 Kasım Pazar',     desc: 'HYROX Doubles seçilirse sabah yarış · son tam gün' },
+  { key: 'day5', date: '2026-11-15', short: 'Paz', num: 15, title: '15 Kasım Pazar',     desc: 'HYROX Doubles sabahı (Mertcan & Atay) · son tam gün' },
   { key: 'day6', date: '2026-11-16', short: 'Pzt', num: 16, title: '16 Kasım Pazartesi', desc: 'Dönüş günü', closed: { lunch_nap: 'Dönüş uçuşu', afternoon: 'İstanbul 17:55', evening: 'Evdeyiz' } }
 ];
 
@@ -69,7 +69,7 @@ const POOL = [
   { id: 'stravinsky', name: 'Dr. Stravinsky',             cat: 'night',  area: 'El Born',           addr: 'Carrer dels Mirallers 5',         url: 'https://drstravinsky.cat/',        icon: 'fa-flask-vial',      res: false, kid: false, best: ['evening'],               desc: 'Kendi likörlerini damıtan simya kokteyl barı (World\'s 50 Best Bars).' },
   { id: 'mariposa',   name: 'Mariposa Negra',             cat: 'night',  area: 'El Born',           addr: 'Plaça de les Olles 4',            url: 'https://mariposanegrabar.com/',    icon: 'fa-wand-magic-sparkles', res: false, kid: false, best: ['evening'],           desc: 'Eski Savoy American Bar şefi Luca Corradini\'nin barı; el yapımı seramik/3D baskı bardaklarda kokteyller.' },
   { id: 'gatsby',     name: 'Gatsby Barcelona',           cat: 'night',  area: 'Sant Gervasi',      addr: 'Carrer de Tuset 19',              url: 'https://gatsbybarcelona.com/',     icon: 'fa-masks-theater',   res: true,  kid: false, best: ['evening'],               desc: 'Canlı müzik, dans ve kabare gösterili dinner-show (çocuksuz gece).' },
-  { id: 'hyrox',      name: 'HYROX Barcelona',            cat: 'sport',  area: 'Fira Gran Via',     addr: 'Fira Barcelona Gran Via, Av. Joan Carles I 64, L\'Hospitalet de Llobregat', url: 'https://hyrox.com/event/hyrox-barcelona-2/', icon: 'fa-dumbbell', res: true, kid: true, best: ['evening', 'morning'], desc: '11–15 Kasım 2026. Perşembe Relay (4 kişi) veya Pazar Doubles (Mertcan & Atay). Aileler tribünde.' }
+  { id: 'hyrox',      name: 'HYROX Barcelona',            cat: 'sport',  area: 'Fira Gran Via',     addr: 'Fira Barcelona Gran Via, Av. Joan Carles I 64, L\'Hospitalet de Llobregat', url: 'https://hyrox.com/event/hyrox-barcelona-2/', icon: 'fa-dumbbell', res: true, kid: true, best: ['morning'], desc: 'Pazar 15 Kasım sabahı Men\'s Doubles: Mertcan & Atay. Aileler tribünde ya da yarış sürerken Park Güell\'de.' }
 ];
 
 // Silinemeyen, takvime sabit olaylar
@@ -81,6 +81,9 @@ const FIXED_EVENTS = {
       { time: '12:15', title: 'Otele check-in, bavulları bırak', icon: 'fa-hotel' }
     ]
   },
+  day5: {
+    morning: [ { time: 'Sabah', title: 'HYROX Men\'s Doubles · Mertcan & Atay · Fira Gran Via', icon: 'fa-dumbbell' } ]
+  },
   day6: {
     morning: [
       { time: '08:30', title: 'Kahvaltı + Hofmann\'dan paket kruvasan', icon: 'fa-bread-slice' },
@@ -91,16 +94,8 @@ const FIXED_EVENTS = {
   }
 };
 
-// Seçenekli ortak kararlar. HYROX'un kazananı takvimdeki HYROX kartını belirler.
+// Seçenekli ortak kararlar (ekip oylar)
 const DECISIONS = [
-  {
-    id: 'hyrox', title: 'HYROX formatı', icon: 'fa-dumbbell',
-    desc: 'Fira Gran Via. Hangi senaryo takvime girsin?',
-    options: [
-      { id: 'relay',   label: 'Perşembe Relay',  sub: '12 Kas akşam · Mertcan, Atay + 2 kişi daha bulunmalı · çıkışta ekipçe tapas kutlaması' },
-      { id: 'doubles', label: 'Pazar Doubles',   sub: '15 Kas sabah · Mertcan & Atay · aileler Park Güell / sahil, öğlen La Pepita kutlaması' }
-    ]
-  },
   {
     id: 'big_dinner', title: 'Cumartesi büyük akşam', icon: 'fa-champagne-glasses',
     desc: '14 Kasım akşamı tüm ekip nerede?',
@@ -112,13 +107,8 @@ const DECISIONS = [
   }
 ];
 
-const HYROX_EVENT = {
-  relay:   { day: 'day2', slot: 'evening', time: 'Akşam', title: 'HYROX Men\'s Relay · Fira Gran Via', icon: 'fa-dumbbell' },
-  doubles: { day: 'day5', slot: 'morning', time: 'Sabah', title: 'HYROX Men\'s Doubles · Fira Gran Via', icon: 'fa-dumbbell' }
-};
-
 // Önerilen plan: kabul edilene kadar kesik çizgili "öneri" kartı olarak görünür.
-// when: sadece HYROX kararı bu yönde ise göster · who: hangi grup için
+// who: hangi grup için
 const SUGGESTED_PLAN = {
   day1: {
     lunch_nap: [ { id: 'ciutadella', who: 'B', note: 'Demir uyurken Atay, Alev & Keremacar' } ],
@@ -129,13 +119,13 @@ const SUGGESTED_PLAN = {
     morning:   [ { id: 'boqueria' } ],
     lunch_nap: [ { id: 'cosmocaixa', who: 'B' } ],
     afternoon: [ { id: 'barceloneta' }, { id: 'fritas' } ],
-    evening:   [ { id: 'succulent', when: 'relay', note: 'Yarış sonrası ekipçe kutlama' }, { id: 'canete', when: '!relay' } ]
+    evening:   [ { id: 'canete' } ]
   },
   day3: {
     morning:   [ { id: 'sagrada' } ],
     lunch_nap: [ { id: 'zoo', who: 'B' } ],
     afternoon: [ { id: 'ciutadella', note: 'Kayık turu' }, { id: 'campana' } ],
-    evening:   [ { id: 'canete', when: 'relay' }, { id: 'stravinsky', note: 'Yemek sonrası yetişkinler' } ]
+    evening:   [ { id: 'succulent', note: 'Cuma açık, hafta sonu kapalı' }, { id: 'stravinsky', note: 'Yemek sonrası yetişkinler' } ]
   },
   day4: {
     morning:   [ { id: 'faire' }, { id: 'nomad' } ],
@@ -144,9 +134,9 @@ const SUGGESTED_PLAN = {
     evening:   [ { id: 'nacional', note: 'Ekipçe büyük akşam' }, { id: 'gatsby', note: 'Yetişkinler, çocuklar uyuduktan sonra' } ]
   },
   day5: {
-    morning:   [ { id: 'guell', when: 'doubles', note: 'Aileler, yarış sürerken' }, { id: 'funky', when: '!doubles' } ],
+    morning:   [ { id: 'guell', note: 'Aileler, yarış sürerken' } ],
     lunch_nap: [ { id: 'pepita', note: 'Madalya kutlaması / Gràcia' } ],
-    afternoon: [ { id: 'funky', when: 'doubles' }, { id: 'barceloneta', when: '!doubles' } ],
+    afternoon: [ { id: 'funky' } ],
     evening:   [ { id: 'malvon' }, { id: 'pizzalocal', note: 'Son akşam sakin' } ]
   }
 };
@@ -162,7 +152,7 @@ const CHECKLIST = [
   { id: 'nacional',  text: 'El Nacional 6 kişilik masa', cat: 'Rezervasyon', url: 'https://www.elnacionalbcn.com/' },
   { id: 'succulent', text: 'Suculent rezervasyonu (hafta sonu kapalı)', cat: 'Rezervasyon', url: 'https://suculent.com/' },
   { id: 'gatsby',    text: 'Gatsby show rezervasyonu', cat: 'Rezervasyon', url: 'https://gatsbybarcelona.com/' },
-  { id: 'hyrox',     text: 'HYROX kaydı (Relay ise 2 kişi daha bul)', cat: 'HYROX', url: 'https://hyrox.com/event/hyrox-barcelona-2/' },
+  { id: 'hyrox',     text: 'HYROX Doubles kaydı (Mertcan & Atay, Pazar)', cat: 'HYROX', url: 'https://hyrox.com/event/hyrox-barcelona-2/' },
   { id: 'transfer1', text: '11 Kas havalimanı → otel transferi (taksi / Aerobús)', cat: 'Ulaşım', url: 'https://aerobusbarcelona.es/en/' },
   { id: 'transfer2', text: '16 Kas 09:30 otel → havalimanı transferi', cat: 'Ulaşım', url: 'https://aerobusbarcelona.es/en/' },
   { id: 'tcasual',   text: 'T-Casual (10 biniş, 13 €) / Hola BCN kartı', cat: 'Ulaşım', url: 'https://www.tmb.cat/en/barcelona-fares-metro-bus/t-casual' },

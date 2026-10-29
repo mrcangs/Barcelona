@@ -137,13 +137,6 @@
     return { counts, mine: v[state.me] || null, winner: tie ? null : winner, total: Object.keys(v).length };
   }
 
-  const hyroxWinner = () => decisionTally('hyrox').winner;
-
-  function suggestionVisible(s) {
-    if (!s.when) return true;
-    const w = hyroxWinner();
-    return s.when.startsWith('!') ? w !== s.when.slice(1) : w === s.when;
-  }
 
   // ---------- zaman ----------
   function todayKey() {
@@ -275,23 +268,14 @@
   }
 
   // ---------- RENDER: zaman çizelgesi ----------
-  function fixedEventsFor(day, slot) {
-    const list = ((FIXED_EVENTS[day] || {})[slot] || []).slice();
-    const w = hyroxWinner();
-    Object.entries(HYROX_EVENT).forEach(([opt, ev]) => {
-      if (ev.day !== day || ev.slot !== slot) return;
-      if (w === opt) list.push(ev);
-      else if (!w) list.push(Object.assign({}, ev, { pending: true, title: ev.title + T('fixed.pending') }));
-    });
-    return list;
-  }
+  const fixedEventsFor = (day, slot) => (FIXED_EVENTS[day] || {})[slot] || [];
 
   function fixedCard(ev) {
-    return `<div class="flex items-center gap-3 rounded-xl px-3 py-2.5 ${ev.pending ? 'dashed' : 'surface2'}">
-      <i class="fa-solid ${ev.icon} w-4 text-center ${ev.pending ? 'muted' : 'accent'}" aria-hidden="true"></i>
+    return `<div class="flex items-center gap-3 rounded-xl px-3 py-2.5 surface2">
+      <i class="fa-solid ${ev.icon} w-4 text-center accent" aria-hidden="true"></i>
       <span class="text-[11px] font-bold muted w-14 shrink-0">${esc(ev.time)}</span>
-      <span class="text-sm font-semibold ${ev.pending ? 'muted' : ''}">${esc(ev.title)}</span>
-      ${ev.pending ? '' : `<i class="fa-solid fa-lock text-[10px] muted ml-auto" aria-label="${esc(T('fixed.locked'))}"></i>`}
+      <span class="text-sm font-semibold">${esc(ev.title)}</span>
+      <i class="fa-solid fa-lock text-[10px] muted ml-auto" aria-label="${esc(T('fixed.locked'))}"></i>
     </div>`;
   }
 
@@ -360,7 +344,7 @@
         .sort((a, b) => (b[1].confirmed ? 1 : 0) - (a[1].confirmed ? 1 : 0) || voteTally(b[0]).score - voteTally(a[0]).score || (a[1].addedAt || 0) - (b[1].addedAt || 0));
       const fixed = fixedEventsFor(d.key, slot.key);
       const takenIds = new Set(items.map(([, it]) => it.activityId));
-      const sugg = (((SUGGESTED_PLAN[d.key] || {})[slot.key]) || []).filter(s => suggestionVisible(s) && !takenIds.has(s.id));
+      const sugg = (((SUGGESTED_PLAN[d.key] || {})[slot.key]) || []).filter(s => !takenIds.has(s.id));
       const isClosed = !!closed[slot.key];
 
       html += `<section class="grid grid-cols-[44px_1fr] gap-2.5 ${status === 'past' ? 'past' : ''}">
@@ -396,7 +380,7 @@
     const today = todayKey();
     $('#planBody').innerHTML = `<div class="space-y-3">${DAYS.map(d => {
       const rows = SLOTS.map(slot => {
-        const fixed = fixedEventsFor(d.key, slot.key).filter(e => !e.pending).map(e => `<span class="muted">${esc(e.title)}</span>`);
+        const fixed = fixedEventsFor(d.key, slot.key).map(e => `<span class="muted">${esc(e.title)}</span>`);
         const items = Object.values(slotItems(d.key, slot.key))
           .sort((a, b) => (b.confirmed ? 1 : 0) - (a.confirmed ? 1 : 0))
           .map(i => i.confirmed ? `<strong>${esc(itemName(i))} ✓</strong>` : esc(itemName(i)));

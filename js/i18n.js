@@ -33,7 +33,6 @@ const UI = {
     'slot.now': 'Şimdi',
     'slot.addAria': '{slot} slotuna ekle',
     'slot.empty': 'Boş · + ile havuzdan ekle',
-    'fixed.pending': ' (karar bekleniyor)',
     'fixed.locked': 'Sabit',
     'item.confirmed': 'Kesin',
     'item.resNeeded': 'Rezervasyon / bilet gerekli',
@@ -101,7 +100,6 @@ const UI = {
     'slot.now': 'Ahora',
     'slot.addAria': 'Añadir a {slot}',
     'slot.empty': 'Vacío · añade algo con +',
-    'fixed.pending': ' (pendiente de decisión)',
     'fixed.locked': 'Fijo',
     'item.confirmed': 'Confirmado',
     'item.resNeeded': 'Requiere reserva / entrada',
@@ -145,10 +143,10 @@ const UI = {
 const CONTENT_ES = {
   days: {
     day1: { short: 'Mié', title: 'Miércoles, 11 de noviembre', desc: 'Día de llegada · instalarse en el hotel y alrededores', closed: { morning: 'Vuelo y traslado' } },
-    day2: { short: 'Jue', title: 'Jueves, 12 de noviembre', desc: 'Día para descubrir la ciudad · si gana el Relay, HYROX por la noche' },
+    day2: { short: 'Jue', title: 'Jueves, 12 de noviembre', desc: 'Día para descubrir la ciudad · mercado, Boqueria y playa' },
     day3: { short: 'Vie', title: 'Viernes, 13 de noviembre', desc: 'Todo el grupo junto · cultura, parque y tapas gourmet' },
     day4: { short: 'Sáb', title: 'Sábado, 14 de noviembre', desc: 'Playa, compras y gran cena de grupo' },
-    day5: { short: 'Dom', title: 'Domingo, 15 de noviembre', desc: 'Si ganan los Doubles, HYROX por la mañana · último día completo' },
+    day5: { short: 'Dom', title: 'Domingo, 15 de noviembre', desc: 'Mañana de HYROX Doubles (Mertcan y Atay) · último día completo' },
     day6: { short: 'Lun', title: 'Lunes, 16 de noviembre', desc: 'Día de regreso', closed: { lunch_nap: 'Vuelo de vuelta', afternoon: 'Estambul 17:55', evening: 'En casa' } }
   },
   slots: {
@@ -187,24 +185,21 @@ const CONTENT_ES = {
     stravinsky: { desc: 'Coctelería alquimista que destila sus propios licores (World\'s 50 Best Bars).' },
     mariposa:   { desc: 'El bar de Luca Corradini, ex jefe del American Bar del Savoy; cócteles en vasos de cerámica e impresión 3D hechos a mano.' },
     gatsby:     { desc: 'Dinner-show con música en directo, baile y cabaret (noche sin niños).' },
-    hyrox:      { desc: '11–15 de noviembre de 2026. Relay del jueves (4 personas) o Doubles del domingo (Mertcan y Atay). Las familias, en la grada.' }
+    hyrox:      { desc: 'Domingo 15 de noviembre por la mañana, Men\'s Doubles: Mertcan y Atay. Las familias, en la grada o en Park Güell durante la carrera.' }
   },
   fixed: {
     day1: { morning: [
       { title: 'TK1853 IST → BCN (llegada 10:55)' },
       { title: 'Traslado del aeropuerto al hotel' },
       { title: 'Check-in en el hotel, dejar las maletas' } ] },
+    day5: { morning: [ { time: 'Mañana', title: 'HYROX Men\'s Doubles · Mertcan y Atay · Fira Gran Via' } ] },
     day6: { morning: [
       { title: 'Desayuno + cruasanes para llevar de Hofmann' },
       { title: 'Salida del hotel' },
       { title: 'Aeropuerto: maletas, Tax-Free, pasaporte' },
       { title: 'TK1854 BCN → IST (llegada 17:55)' } ] }
   },
-  hyroxEvent: { relay: { time: 'Noche' }, doubles: { time: 'Mañana' } },
   decisions: {
-    hyrox: { title: 'Formato HYROX', desc: 'Fira Gran Via. ¿Qué escenario va al calendario?', options: {
-      relay:   { label: 'Relay del jueves', sub: '12 nov por la noche · Mertcan, Atay + faltan 2 personas · tapas en grupo al terminar' },
-      doubles: { label: 'Doubles del domingo', sub: '15 nov por la mañana · Mertcan y Atay · familias en Park Güell / playa, celebración en La Pepita a mediodía' } } },
     big_dinner: { title: 'Gran cena del sábado', desc: '¿Dónde estamos todos la noche del 14 de noviembre?', options: {
       nacional: { sub: '6 personas, cómodo con niños, sala amplia' },
       gatsby:   { sub: 'Dinner-show para adultos; hace falta canguro o turnos para los niños' },
@@ -214,7 +209,7 @@ const CONTENT_ES = {
     'Demir uyurken Atay, Alev & Keremacar': 'Atay, Alev y Keremacar mientras Demir duerme',
     'Uyanış ödülü + El Born turu': 'Premio al despertar + paseo por El Born',
     'Yolculuk günü: hızlı ve stressiz': 'Día de viaje: rápido y sin estrés',
-    'Yarış sonrası ekipçe kutlama': 'Celebración en grupo después de la carrera',
+    'Cuma açık, hafta sonu kapalı': 'Abre el viernes, cerrado el fin de semana',
     'Kayık turu': 'Paseo en barca',
     'Yemek sonrası yetişkinler': 'Adultos, después de cenar',
     'Ekipçe büyük akşam': 'Gran cena de grupo',
@@ -234,7 +229,7 @@ const CONTENT_ES = {
     nacional: 'Mesa para 6 en El Nacional',
     succulent: 'Reserva en Suculent (cerrado el fin de semana)',
     gatsby: 'Reserva del show de Gatsby',
-    hyrox: 'Inscripción HYROX (si es Relay, buscar 2 personas más)',
+    hyrox: 'Inscripción HYROX Doubles (Mertcan y Atay, domingo)',
     transfer1: '11 nov: traslado aeropuerto → hotel (taxi / Aerobús)',
     transfer2: '16 nov 09:30: traslado hotel → aeropuerto',
     tcasual: 'T-casual (10 viajes, 13 €) / tarjeta Hola BCN',
@@ -261,7 +256,6 @@ function applySpanishContent() {
   POOL.forEach(a => Object.assign(a, C.pool[a.id] || {}));
   Object.entries(C.fixed).forEach(([day, slots]) => Object.entries(slots).forEach(([slot, list]) =>
     list.forEach((ev, i) => Object.assign(FIXED_EVENTS[day][slot][i], ev))));
-  Object.entries(C.hyroxEvent).forEach(([k, v]) => Object.assign(HYROX_EVENT[k], v));
   DECISIONS.forEach(dec => {
     const tr = C.decisions[dec.id];
     if (!tr) return;
