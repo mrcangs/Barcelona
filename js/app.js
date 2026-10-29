@@ -68,7 +68,8 @@
     const cls = 'h-8 px-2.5 rounded-lg btn-ghost inline-flex items-center gap-1.5 text-xs font-bold';
     const web = a.url ? `<a href="${esc(a.url)}" target="_blank" rel="noopener" class="${cls}" aria-label="${esc(a.name)} · ${esc(T('link.web'))}"><i class="fa-solid fa-globe accent" aria-hidden="true"></i>${esc(T('link.web'))}</a>` : '';
     const map = `<a href="${esc(mapsFor(a))}" target="_blank" rel="noopener" class="${cls}" aria-label="${esc(a.name)} · Google Maps"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i>${esc(T('link.map'))}</a>`;
-    return `<div class="flex flex-wrap gap-1.5 mt-2">${web}${map}</div>`;
+    const ig = a.ig ? `<a href="https://www.instagram.com/${encodeURIComponent(a.ig)}/" target="_blank" rel="noopener" class="${cls}" aria-label="${esc(a.name)} · Instagram"><i class="fa-brands fa-instagram" style="color:#d62976" aria-hidden="true"></i>Instagram</a>` : '';
+    return `<div class="flex flex-wrap gap-1.5 mt-2">${web}${ig}${map}</div>`;
   }
 
   function avatar(id, size = 'w-7 h-7 text-[11px]') {
