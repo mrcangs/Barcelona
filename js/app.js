@@ -72,6 +72,13 @@
     return `<div class="flex flex-wrap gap-1.5 mt-2">${web}${ig}${map}</div>`;
   }
 
+  // Serbest metindeki http(s) linklerini tıklanabilir yapar; geri kalan her şey kaçışlı
+  function linkify(text) {
+    return String(text || '').split(/(https?:\/\/[^\s]+)/g).map((part, i) => i % 2
+      ? `<a href="${esc(part)}" target="_blank" rel="noopener" class="accent underline break-all">${esc(part)}</a>`
+      : esc(part)).join('');
+  }
+
   function avatar(id, size = 'w-7 h-7 text-[11px]') {
     const p = person(id);
     if (!p) return '';
@@ -300,7 +307,9 @@
           <div class="flex items-center gap-1.5 flex-wrap">
             <h4 class="text-sm font-extrabold leading-snug">${esc(itemName(item))}</h4>
             ${item.confirmed ? `<span class="tag btn-accent"><i class="fa-solid fa-check" aria-hidden="true"></i> ${esc(T('item.confirmed'))}</span>` : ''}
-            ${act.res ? `<span class="tag tag-res" title="${esc(T('item.resNeeded'))}"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>` : ''}
+            ${item.ticket ? `<span class="tag surface2 ok" title="${esc(T('info.hasTicket'))}"><i class="fa-solid fa-ticket" aria-hidden="true"></i> ✓</span>`
+              : act.res ? `<span class="tag tag-res" title="${esc(T('item.resNeeded'))}"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>` : ''}
+            ${item.note ? `<span class="tag surface2 muted" title="${esc(T('info.hasNote'))}"><i class="fa-solid fa-note-sticky" aria-hidden="true"></i></span>` : ''}
           </div>
           <div class="flex items-center gap-1.5 mt-1 flex-wrap text-[11px] muted">
             ${area ? `<span>${esc(area)}</span>` : ''}
@@ -663,8 +672,39 @@
       const desc = act.desc || '';
       const name = itemName(item);
       const area = itemArea(item);
+      // Canlı güncellemeler sheet'i yeniden çizer; yazılan metni, odağı ve kaydırmayı koru
+      const keep = {};
+      if (isUpdate) {
+        const body = $('#detailBody');
+        if (body) keep.scroll = body.scrollTop;
+        const form = $('#infoForm');
+        if (form && s.editInfo) {
+          keep.ticket = form.elements.ticket.value;
+          keep.note = form.elements.note.value;
+          const a = document.activeElement;
+          if (a && a.form === form) keep.focus = { name: a.name, start: a.selectionStart, end: a.selectionEnd };
+        }
+      }
+      const infoBy = person(item.infoBy);
+      const fld = 'mt-1 w-full rounded-xl px-3 py-2.5 text-sm';
+      const infoHtml = s.editInfo ? `
+          <form id="infoForm" class="space-y-3">
+            <label class="block"><span class="text-xs font-bold muted">${esc(T('info.ticket'))}</span><textarea name="ticket" maxlength="500" rows="2" class="${fld}" placeholder="${esc(T('info.ticketPh'))}">${esc(item.ticket || '')}</textarea></label>
+            <label class="block"><span class="text-xs font-bold muted">${esc(T('info.note'))}</span><textarea name="note" maxlength="1000" rows="4" class="${fld}" placeholder="${esc(T('info.notePh'))}">${esc(item.note || '')}</textarea></label>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" data-action="cancel-info" class="h-11 rounded-xl btn-ghost text-sm font-bold">${esc(T('info.cancel'))}</button>
+              <button type="submit" class="h-11 rounded-xl btn-accent text-sm font-bold">${esc(T('info.save'))}</button>
+            </div>
+          </form>`
+        : (item.ticket || item.note) ? `
+          <div class="rounded-xl surface2 p-3 space-y-2.5">
+            ${item.ticket ? `<div class="flex gap-2.5 text-sm"><i class="fa-solid fa-ticket ok mt-1" aria-hidden="true"></i><div class="min-w-0 break-words whitespace-pre-line">${linkify(item.ticket)}</div></div>` : ''}
+            ${item.note ? `<div class="flex gap-2.5 text-sm"><i class="fa-solid fa-note-sticky muted mt-1" aria-hidden="true"></i><div class="min-w-0 break-words whitespace-pre-line">${linkify(item.note)}</div></div>` : ''}
+            ${infoBy ? `<p class="text-[11px] muted">${esc(T('info.by', { name: infoBy.name }))}${item.infoAt ? ' · ' + new Date(item.infoAt).toLocaleString(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</p>` : ''}
+          </div>`
+        : `<button data-action="edit-info" class="w-full rounded-xl border border-dashed line p-3 text-sm muted text-left"><i class="fa-solid fa-ticket" aria-hidden="true"></i> ${esc(T('info.add'))}</button>`;
       c.innerHTML = sheetHeader(esc(name), `${esc(dayOf(s.day).title)} · ${esc(slotOf(s.slot).label)} ${slotOf(s.slot).start}–${slotOf(s.slot).end}`) + `
-        <div class="px-5 py-4 space-y-5 overflow-y-auto pb-safe">
+        <div id="detailBody" class="px-5 py-4 space-y-5 overflow-y-auto pb-safe">
           <div class="flex flex-wrap gap-1.5 items-center">
             <span class="tag tag-${esc(item.cat || 'custom')}">${esc((catOf(item.cat) || { label: T('pool.teamIdea') }).label)}</span>
             ${act.res ? `<span class="tag tag-res"><i class="fa-solid fa-ticket" aria-hidden="true"></i> ${esc(T('item.resNeeded'))}</span>` : ''}
@@ -699,6 +739,14 @@
               </button>`).join('')}</div>
           </div>
 
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-xs font-bold muted">${esc(T('info.title'))}</p>
+              ${!s.editInfo && (item.ticket || item.note) ? `<button data-action="edit-info" class="h-8 px-2.5 rounded-lg btn-ghost text-xs font-bold"><i class="fa-solid fa-pen" aria-hidden="true"></i> ${esc(T('info.edit'))}</button>` : ''}
+            </div>
+            ${infoHtml}
+          </div>
+
           <div class="flex flex-col gap-2">
             <button data-action="confirm-item" class="h-12 rounded-xl text-sm font-bold ${item.confirmed ? 'btn-ghost' : 'btn-accent'}">
               <i class="fa-solid ${item.confirmed ? 'fa-rotate-left' : 'fa-check'}" aria-hidden="true"></i> ${esc(T(item.confirmed ? 'detail.unconfirm' : 'detail.confirm'))}
@@ -710,6 +758,17 @@
           </div>
           <p class="text-[11px] muted">${by ? esc(T('detail.addedBy', { name: by.name })) : ''}${item.addedAt ? ' · ' + new Date(item.addedAt).toLocaleString(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</p>
         </div>`;
+      const form = $('#infoForm');
+      if (form && 'ticket' in keep) {
+        form.elements.ticket.value = keep.ticket;
+        form.elements.note.value = keep.note;
+      }
+      if (form && keep.focus) {
+        const f = form.elements[keep.focus.name];
+        f.focus();
+        try { f.setSelectionRange(keep.focus.start, keep.focus.end); } catch (e) { /* yok say */ }
+      }
+      if (keep.scroll) $('#detailBody').scrollTop = keep.scroll;
       return;
     }
     if (s.type === 'custom') {
@@ -809,6 +868,13 @@
       const item = slotItems(s.day, s.slot)[s.key];
       write(`slots/${s.day}/${s.slot}/${s.key}/confirmed`, item && item.confirmed ? null : true);
     },
+    'edit-info': () => {
+      state.sheet.editInfo = true;
+      renderSheet(true);
+      const f = $('#infoForm textarea');
+      if (f) f.focus();
+    },
+    'cancel-info': () => { state.sheet.editInfo = false; renderSheet(false); },
     move: () => {
       const s = state.sheet;
       const item = slotItems(s.day, s.slot)[s.key];
@@ -868,6 +934,23 @@
       tripRef.child('discussions').push({ user: state.me, text, timestamp: firebase.database.ServerValue.TIMESTAMP })
         .catch(err => toast(T('toast.sendFail', { e: err.code })));
       input.value = '';
+    }
+    if (e.target.id === 'infoForm') {
+      e.preventDefault();
+      const s = state.sheet;
+      if (!s || !slotItems(s.day, s.slot)[s.key]) return;
+      const ticket = e.target.elements.ticket.value.trim().slice(0, 500);
+      const note = e.target.elements.note.value.trim().slice(0, 1000);
+      tripRef.child(`slots/${s.day}/${s.slot}/${s.key}`).update({
+        ticket: ticket || null,
+        note: note || null,
+        infoBy: state.me,
+        infoAt: firebase.database.ServerValue.TIMESTAMP
+      }).then(() => {
+        toast(T('toast.saved'));
+        if (state.sheet === s) { s.editInfo = false; renderSheet(false); }
+      }).catch(err => toast(T('toast.saveFail', { e: err.code })));
+      return;
     }
     if (e.target.id === 'customForm') {
       e.preventDefault();

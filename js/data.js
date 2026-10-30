@@ -70,6 +70,7 @@ const POOL = [
   { id: 'campnou',    name: 'Camp Nou Turu',              cat: 'kids',   area: 'Les Corts',         addr: 'Spotify Camp Nou',                url: 'https://www.fcbarcelona.com/en/tickets/camp-nou-experience', icon: 'fa-futbol', res: true, kid: true, best: ['lunch_nap', 'morning'], desc: 'Barça müzesi ve stadyum turu. Tadilat nedeniyle açık bölümleri önceden kontrol edin.' },
   { id: 'sagrada',    name: 'La Sagrada Família',         cat: 'sight',  area: 'Eixample',          addr: 'Carrer de Mallorca 401',          url: 'https://sagradafamilia.org/',      icon: 'fa-church',          res: true,  kid: true,  best: ['morning'],               desc: 'Gaudí başyapıtı. Kuleli bilet haftalar önce tükenir; online rezervasyon şart.' },
   { id: 'guell',      name: 'Park Güell',                 cat: 'sight',  area: 'Gràcia',            addr: 'Park Güell',                      url: 'https://parkguell.barcelona/',     icon: 'fa-mountain-sun',    res: true,  kid: true,  best: ['morning'],               desc: 'Mozaik teras ve şehir manzarası. Saatli giriş bileti gerekir; yokuşlu, puset zor.' },
+  { id: 'picasso',    name: 'Museu Picasso',              cat: 'sight',  area: 'El Born',           addr: 'Carrer de Montcada 15-23',        url: 'https://museupicassobcn.cat/en',   icon: 'fa-palette',         res: true,  kid: true,  best: ['morning', 'afternoon'],  desc: 'Picasso\'nun gençlik yıllarının eserleri, beş Ortaçağ sarayında. Sal–Paz 10:00–19:00, Pazartesi kapalı. 12 € online, 18 yaş altı ücretsiz. Perşembe 16:00–19:00 ücretsiz; rezervasyon 4 gün önce 10:00\'da açılır.' },
   { id: 'drymartini', name: 'Dry Martini',                cat: 'night',  area: 'Eixample',          addr: "Carrer d'Aribau 162",             url: 'https://www.drymartiniorg.com/',   icon: 'fa-martini-glass',   res: false, kid: false, best: ['evening'],               desc: 'Javier de las Muelas imzalı efsane kokteyl barı (yetişkin akşamı).' },
   { id: 'stravinsky', name: 'Dr. Stravinsky',             cat: 'night',  area: 'El Born',           addr: 'Carrer dels Mirallers 5',         url: 'https://drstravinsky.cat/',        icon: 'fa-flask-vial',      res: false, kid: false, best: ['evening'],               desc: 'Kendi likörlerini damıtan simya kokteyl barı (World\'s 50 Best Bars).' },
   { id: 'mariposa',   name: 'Mariposa Negra',             cat: 'night',  area: 'El Born',           addr: 'Plaça de les Olles 4',            url: 'https://mariposanegrabar.com/',    icon: 'fa-wand-magic-sparkles', res: false, kid: false, best: ['evening'],           desc: 'Eski Savoy American Bar şefi Luca Corradini\'nin barı; el yapımı seramik/3D baskı bardaklarda kokteyller.' },
@@ -123,7 +124,7 @@ const SUGGESTED_PLAN = {
   day2: {
     morning:   [ { id: 'boqueria' } ],
     lunch_nap: [ { id: 'cosmocaixa', who: 'B' } ],
-    afternoon: [ { id: 'barceloneta' }, { id: 'fritas' } ],
+    afternoon: [ { id: 'barceloneta' }, { id: 'fritas' }, { id: 'picasso', note: 'Perşembe 16–19 ücretsiz (8 Kas 10:00\'da rezervasyon)' } ],
     evening:   [ { id: 'canete' } ]
   },
   day3: {
@@ -150,6 +151,8 @@ const SUGGESTED_PLAN = {
 const CHECKLIST = [
   { id: 'sagrada',   text: 'Sagrada Família kuleli bilet', cat: 'Bilet', url: 'https://sagradafamilia.org/en/tickets' },
   { id: 'guell',     text: 'Park Güell saatli bilet', cat: 'Bilet', url: 'https://parkguell.barcelona/en/buy-tickets' },
+  { id: 'catedral',  text: 'Barselona Katedrali bileti', cat: 'Bilet', url: 'https://tickets.catedralbcn.org/en' },
+  { id: 'picasso',   text: 'Picasso Müzesi bileti (Per 16–19 ücretsiz, 4 gün önce)', cat: 'Bilet', url: 'https://museupicassobcn.cat/en/plan-your-visit/buy-tickets-and-opening-hours' },
   { id: 'cosmo',     text: 'CosmoCaixa bileti', cat: 'Bilet', url: 'https://cosmocaixa.org/es/' },
   { id: 'zoo',       text: 'Zoo online bilet', cat: 'Bilet', url: 'https://zoobarcelona.cat/en/tickets' },
   { id: 'campnou',   text: 'Camp Nou turu (açık mı kontrol)', cat: 'Bilet', url: 'https://www.fcbarcelona.com/en/tickets/camp-nou-experience' },
