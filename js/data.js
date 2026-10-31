@@ -208,7 +208,7 @@ const SUGGESTED_PLAN = {
     evening:   [ { id: 'nacional', note: 'Ekipçe büyük akşam' }, { id: 'gatsby', note: 'Yetişkinler, çocuklar uyuduktan sonra' } ]
   },
   day5: {
-    morning:   [ { id: 'guell', note: 'Aileler, yarış sürerken' } ],
+    morning:   [ { id: 'ciutadella', note: 'Aileler, yarış sürerken' } ],
     lunch_nap: [ { id: 'pepita', note: 'Madalya kutlaması / Gràcia' } ],
     afternoon: [ { id: 'funky' } ],
     evening:   [ { id: 'malvon' }, { id: 'pizzalocal', note: 'Son akşam sakin' } ]

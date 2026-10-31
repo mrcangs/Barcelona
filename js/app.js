@@ -72,6 +72,10 @@
     return `<div class="flex flex-wrap gap-1.5 mt-2">${web}${ig}${map}</div>`;
   }
 
+  // Bilet PDF'leri / görseller base64 olarak plan kartının altında (gizli anahtarlı veritabanında) durur
+  const MAX_FILE_MB = 3;
+  const fileSize = n => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+
   // Serbest metindeki http(s) linklerini tıklanabilir yapar; geri kalan her şey kaçışlı
   function linkify(text) {
     return String(text || '').split(/(https?:\/\/[^\s]+)/g).map((part, i) => i % 2
@@ -307,7 +311,7 @@
           <div class="flex items-center gap-1.5 flex-wrap">
             <h4 class="text-sm font-extrabold leading-snug">${esc(itemName(item))}</h4>
             ${item.confirmed ? `<span class="tag btn-accent"><i class="fa-solid fa-check" aria-hidden="true"></i> ${esc(T('item.confirmed'))}</span>` : ''}
-            ${item.ticket ? `<span class="tag surface2 ok" title="${esc(T('info.hasTicket'))}"><i class="fa-solid fa-ticket" aria-hidden="true"></i> ✓</span>`
+            ${item.ticket || item.files ? `<span class="tag surface2 ok" title="${esc(T('info.hasTicket'))}"><i class="fa-solid fa-ticket" aria-hidden="true"></i> ✓</span>`
               : act.res ? `<span class="tag tag-res" title="${esc(T('item.resNeeded'))}"><i class="fa-solid fa-ticket" aria-hidden="true"></i></span>` : ''}
             ${item.note ? `<span class="tag surface2 muted" title="${esc(T('info.hasNote'))}"><i class="fa-solid fa-note-sticky" aria-hidden="true"></i></span>` : ''}
           </div>
@@ -703,17 +707,34 @@
       }
       const infoBy = person(item.infoBy);
       const fld = 'mt-1 w-full rounded-xl px-3 py-2.5 text-sm';
+      const files = Object.entries(item.files || {});
+      const fileRow = ([fid, f]) => `<div class="flex items-center gap-2">
+            <button data-action="open-file" data-fid="${esc(fid)}" class="flex-1 min-w-0 h-11 px-3 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold text-left">
+              <i class="fa-solid ${f.type === 'application/pdf' ? 'fa-file-pdf bad' : 'fa-file-image accent'}" aria-hidden="true"></i><span class="truncate">${esc(f.name)}</span><span class="text-[11px] muted font-normal shrink-0">${fileSize(f.size)}</span>
+            </button>
+            ${s.editInfo ? `<button type="button" data-action="del-file" data-fid="${esc(fid)}" class="w-11 h-11 shrink-0 rounded-xl btn-ghost bad" aria-label="${esc(T('file.del'))}"><i class="fa-solid fa-trash-can" aria-hidden="true"></i></button>` : ''}
+          </div>`;
+      const filesHtml = files.map(fileRow).join('');
       const infoHtml = s.editInfo ? `
           <form id="infoForm" class="space-y-3">
             <label class="block"><span class="text-xs font-bold muted">${esc(T('info.ticket'))}</span><textarea name="ticket" maxlength="500" rows="2" class="${fld}" placeholder="${esc(T('info.ticketPh'))}">${esc(item.ticket || '')}</textarea></label>
             <label class="block"><span class="text-xs font-bold muted">${esc(T('info.note'))}</span><textarea name="note" maxlength="1000" rows="4" class="${fld}" placeholder="${esc(T('info.notePh'))}">${esc(item.note || '')}</textarea></label>
+            <div class="space-y-2">
+              <span class="text-xs font-bold muted">${esc(T('file.title'))}</span>
+              ${filesHtml}
+              <label class="h-11 rounded-xl border border-dashed line text-sm muted font-bold flex items-center justify-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-paperclip" aria-hidden="true"></i> ${esc(T('file.add', { mb: MAX_FILE_MB }))}
+                <input id="fileInput" type="file" accept="application/pdf,image/*" class="sr-only">
+              </label>
+            </div>
             <div class="grid grid-cols-2 gap-2">
               <button type="button" data-action="cancel-info" class="h-11 rounded-xl btn-ghost text-sm font-bold">${esc(T('info.cancel'))}</button>
               <button type="submit" class="h-11 rounded-xl btn-accent text-sm font-bold">${esc(T('info.save'))}</button>
             </div>
           </form>`
-        : (item.ticket || item.note) ? `
+        : (item.ticket || item.note || files.length) ? `
           <div class="rounded-xl surface2 p-3 space-y-2.5">
+            ${filesHtml}
             ${item.ticket ? `<div class="flex gap-2.5 text-sm"><i class="fa-solid fa-ticket ok mt-1" aria-hidden="true"></i><div class="min-w-0 break-words whitespace-pre-line">${linkify(item.ticket)}</div></div>` : ''}
             ${item.note ? `<div class="flex gap-2.5 text-sm"><i class="fa-solid fa-note-sticky muted mt-1" aria-hidden="true"></i><div class="min-w-0 break-words whitespace-pre-line">${linkify(item.note)}</div></div>` : ''}
             ${infoBy ? `<p class="text-[11px] muted">${esc(T('info.by', { name: infoBy.name }))}${item.infoAt ? ' · ' + new Date(item.infoAt).toLocaleString(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</p>` : ''}
@@ -759,7 +780,7 @@
           <div>
             <div class="flex items-center justify-between mb-2">
               <p class="text-xs font-bold muted">${esc(T('info.title'))}</p>
-              ${!s.editInfo && (item.ticket || item.note) ? `<button data-action="edit-info" class="h-8 px-2.5 rounded-lg btn-ghost text-xs font-bold"><i class="fa-solid fa-pen" aria-hidden="true"></i> ${esc(T('info.edit'))}</button>` : ''}
+              ${!s.editInfo && (item.ticket || item.note || files.length) ? `<button data-action="edit-info" class="h-8 px-2.5 rounded-lg btn-ghost text-xs font-bold"><i class="fa-solid fa-pen" aria-hidden="true"></i> ${esc(T('info.edit'))}</button>` : ''}
             </div>
             ${infoHtml}
           </div>
@@ -892,6 +913,24 @@
       if (f) f.focus();
     },
     'cancel-info': () => { state.sheet.editInfo = false; renderSheet(false); },
+    'open-file': el => {
+      const s = state.sheet;
+      const item = slotItems(s.day, s.slot)[s.key];
+      const f = item && item.files && item.files[el.dataset.fid];
+      if (!f) return;
+      const bin = atob(f.data);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: f.type }));
+      if (!window.open(url, '_blank')) location.href = url; // açılır pencere engellendiyse aynı sekmede aç
+    },
+    'del-file': el => {
+      const s = state.sheet;
+      const item = slotItems(s.day, s.slot)[s.key];
+      const f = item && item.files && item.files[el.dataset.fid];
+      if (!f || !confirm(T('file.delAsk', { name: f.name }))) return;
+      write(`slots/${s.day}/${s.slot}/${s.key}/files/${el.dataset.fid}`, null);
+    },
     move: () => {
       const s = state.sheet;
       const item = slotItems(s.day, s.slot)[s.key];
@@ -940,6 +979,28 @@
       state.poolQuery = e.target.value;
       if (e.target.id === 'poolSearch') renderPool(); else renderSheet(true);
     }
+  });
+
+  document.addEventListener('change', e => {
+    if (e.target.id !== 'fileInput') return;
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    const s = state.sheet;
+    if (!file || !s || s.type !== 'detail' || !slotItems(s.day, s.slot)[s.key]) return;
+    if (file.size > MAX_FILE_MB * 1048576) { toast(T('file.tooBig', { mb: MAX_FILE_MB })); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      toast(T('file.uploading'));
+      tripRef.child(`slots/${s.day}/${s.slot}/${s.key}/files`).push({
+        name: file.name.slice(0, 120),
+        type: file.type || 'application/octet-stream',
+        size: file.size,
+        data: String(reader.result).split(',')[1],
+        by: state.me,
+        at: firebase.database.ServerValue.TIMESTAMP
+      }).then(() => toast(T('file.added')), err => toast(T('toast.saveFail', { e: err.code })));
+    };
+    reader.readAsDataURL(file);
   });
 
   document.addEventListener('submit', e => {
