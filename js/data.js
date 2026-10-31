@@ -193,7 +193,7 @@ const SUGGESTED_PLAN = {
   day2: {
     morning:   [ { id: 'boqueria' } ],
     lunch_nap: [ { id: 'cosmocaixa', who: 'B' } ],
-    afternoon: [ { id: 'barceloneta' }, { id: 'fritas' }, { id: 'picasso', note: 'Perşembe 16–19 ücretsiz (8 Kas 10:00\'da rezervasyon)' } ],
+    afternoon: [ { id: 'barceloneta' }, { id: 'fritas' } ],
     evening:   [ { id: 'canete' } ]
   },
   day3: {
@@ -221,7 +221,7 @@ const CHECKLIST = [
   { id: 'sagrada',   text: 'Sagrada Família kuleli bilet', cat: 'Bilet', url: 'https://sagradafamilia.org/en/tickets' },
   { id: 'guell',     text: 'Park Güell saatli bilet', cat: 'Bilet', url: 'https://parkguell.barcelona/en/buy-tickets' },
   { id: 'catedral',  text: 'Barselona Katedrali bileti', cat: 'Bilet', url: 'https://tickets.catedralbcn.org/en' },
-  { id: 'picasso',   text: 'Picasso Müzesi bileti (Per 16–19 ücretsiz, 4 gün önce)', cat: 'Bilet', url: 'https://museupicassobcn.cat/en/plan-your-visit/buy-tickets-and-opening-hours' },
+  { id: 'picasso',   text: 'Picasso Müzesi bileti (Paz 15 Kas 10:45)', cat: 'Bilet', url: 'https://museupicassobcn.cat/en/plan-your-visit/buy-tickets-and-opening-hours' },
   { id: 'cosmo',     text: 'CosmoCaixa bileti', cat: 'Bilet', url: 'https://cosmocaixa.org/es/' },
   { id: 'zoo',       text: 'Zoo online bilet', cat: 'Bilet', url: 'https://zoobarcelona.cat/en/tickets' },
   { id: 'campnou',   text: 'Camp Nou turu (açık mı kontrol)', cat: 'Bilet', url: 'https://www.fcbarcelona.com/en/tickets/camp-nou-experience' },

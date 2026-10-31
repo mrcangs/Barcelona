@@ -239,15 +239,14 @@ const CONTENT_ES = {
     'Yetişkinler, çocuklar uyuduktan sonra': 'Adultos, cuando los niños duerman',
     'Aileler, yarış sürerken': 'Familias, mientras dura la carrera',
     'Madalya kutlaması / Gràcia': 'Celebración con medallas / Gràcia',
-    'Son akşam sakin': 'Última noche tranquila',
-    'Perşembe 16–19 ücretsiz (8 Kas 10:00\'da rezervasyon)': 'Jueves 16–19 gratis (reserva el 8 nov a las 10:00)'
+    'Son akşam sakin': 'Última noche tranquila'
   },
   checklistCats: { 'Bilet': 'Entradas', 'Rezervasyon': 'Reservas', 'HYROX': 'HYROX', 'Ulaşım': 'Transporte', 'Bavul': 'Maleta' },
   checklist: {
     sagrada: 'Entrada a la Sagrada Família con torres',
     guell: 'Entrada con hora al Park Güell',
     catedral: 'Entrada a la Catedral de Barcelona',
-    picasso: 'Entrada al Museu Picasso (jueves 16–19 gratis, reserva 4 días antes)',
+    picasso: 'Entrada al Museu Picasso (dom 15 nov 10:45)',
     cosmo: 'Entrada a CosmoCaixa',
     zoo: 'Entrada online al Zoo',
     campnou: 'Tour del Camp Nou (comprobar qué está abierto)',
