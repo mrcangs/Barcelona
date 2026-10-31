@@ -11,3 +11,6 @@ database.rules.local.json
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Kişisel belgeler / fotoğraflar (otel adı vb.)
+Documents/
