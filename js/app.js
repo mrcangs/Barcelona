@@ -417,15 +417,16 @@
   // ---------- RENDER: havuz ----------
   function filteredActivities(targetSlot) {
     const q = state.poolQuery.trim().toLocaleLowerCase(LANG);
+    const tip = a => ATAY_TIPS[a.id];
     let list = allActivities().filter(a =>
-      (state.poolCat === 'all' || a.cat === state.poolCat) &&
-      (!q || `${a.name} ${a.area} ${a.desc}`.toLocaleLowerCase(LANG).includes(q)));
+      (state.poolCat === 'all' || (state.poolCat === 'atay' ? !!tip(a) : a.cat === state.poolCat)) &&
+      (!q || `${a.name} ${a.area} ${a.desc} ${tip(a) ? tip(a).note : ''}`.toLocaleLowerCase(LANG).includes(q)));
     if (targetSlot) list = list.slice().sort((a, b) => (b.best.includes(targetSlot) ? 1 : 0) - (a.best.includes(targetSlot) ? 1 : 0));
     return list;
   }
 
   function catChipsHtml() {
-    const chips = [{ key: 'all', label: T('pool.all'), icon: 'fa-border-all' }].concat(CATEGORIES);
+    const chips = [{ key: 'all', label: T('pool.all'), icon: 'fa-border-all' }, { key: 'atay', label: T('pool.atay'), icon: 'fa-star' }].concat(CATEGORIES);
     return chips.map(c => `<button data-action="pool-cat" data-cat="${c.key}" class="shrink-0 h-9 px-3 rounded-full text-xs font-bold flex items-center gap-1.5 ${state.poolCat === c.key ? 'btn-accent' : 'surface'}"><i class="fa-solid ${c.icon}" aria-hidden="true"></i>${esc(c.label)}</button>`).join('');
   }
 
@@ -447,6 +448,7 @@
           ${a.area ? `<span class="text-[11px] muted">${esc(a.area)}</span>` : ''}
         </div>
         <p class="text-xs muted mt-1 leading-snug">${esc(a.desc)}</p>
+        ${atayTip(a.id)}
         ${linkButtons(a)}
       </div>
       ${targetSlot ? '<span class="self-start w-9 h-9 shrink-0 rounded-lg btn-soft inline-flex items-center justify-center"><i class="fa-solid fa-plus" aria-hidden="true"></i></span>'
@@ -454,10 +456,25 @@
     </div>`;
   }
 
+  function atayTip(id) {
+    const tip = ATAY_TIPS[id];
+    if (!tip) return '';
+    return `<p class="text-[11px] mt-1.5 rounded-lg surface2 px-2 py-1.5 flex gap-1.5 items-start leading-snug">${avatar('atay', 'w-4 h-4 text-[8px] mt-px')}<span><strong>Atay:</strong> ${esc(tip.note)}</span></p>`;
+  }
+
+  // Atay filtresinde liste, onun kâğıdındaki bölümlere göre başlıklarla gruplanır
+  function poolListHtml(list, targetSlot) {
+    if (!list.length) return `<p class="text-sm muted text-center py-6">${esc(T('pool.none'))}</p>`;
+    if (state.poolCat !== 'atay') return list.map(a => poolCard(a, targetSlot)).join('');
+    return ATAY_SECTIONS.map(sec => {
+      const items = list.filter(a => ATAY_TIPS[a.id].sec === sec.key);
+      return items.length ? `<h3 class="text-xs font-extrabold uppercase tracking-wide muted pt-2">${esc(sec.label)}</h3>` + items.map(a => poolCard(a, targetSlot)).join('') : '';
+    }).join('');
+  }
+
   function renderPool() {
     $('#poolCats').innerHTML = catChipsHtml();
-    const list = filteredActivities(null);
-    $('#poolList').innerHTML = list.length ? list.map(a => poolCard(a, null)).join('') : `<p class="text-sm muted text-center py-6">${esc(T('pool.none'))}</p>`;
+    $('#poolList').innerHTML = poolListHtml(filteredActivities(null), null);
   }
 
   // ---------- RENDER: kararlar, ekip, checklist ----------
@@ -639,8 +656,7 @@
           <div class="px-5 py-3 border-t line pb-safe"><button data-action="custom" class="w-full h-11 rounded-xl btn-ghost text-sm font-bold"><i class="fa-solid fa-plus" aria-hidden="true"></i> ${esc(T('sheet.notListed'))}</button></div>`;
       }
       $('#sheetCats').innerHTML = catChipsHtml();
-      const list = filteredActivities(s.slot);
-      $('#sheetList').innerHTML = list.length ? list.map(a => poolCard(a, s.slot)).join('') : `<p class="text-sm muted text-center py-6">${esc(T('pool.none'))}</p>`;
+      $('#sheetList').innerHTML = poolListHtml(filteredActivities(s.slot), s.slot);
       return;
     }
     if (s.type === 'pick-slot') {
@@ -711,6 +727,7 @@
             ${area ? `<span class="text-xs muted">${esc(area)}</span>` : ''}
           </div>
           ${desc ? `<p class="text-sm leading-relaxed">${esc(desc)}</p>` : ''}
+          ${atayTip(item.activityId)}
           <div class="flex flex-wrap gap-2">
             ${act.url ? `<a href="${esc(act.url)}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-globe accent" aria-hidden="true"></i> ${esc(T('link.web'))}</a>` : ''}
             <a href="${esc(mapsFor({ name, addr: act.addr, area }))}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i> ${esc(T('link.mapOpen'))}</a>

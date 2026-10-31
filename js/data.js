@@ -75,8 +75,76 @@ const POOL = [
   { id: 'stravinsky', name: 'Dr. Stravinsky',             cat: 'night',  area: 'El Born',           addr: 'Carrer dels Mirallers 5',         url: 'https://drstravinsky.cat/',        icon: 'fa-flask-vial',      res: false, kid: false, best: ['evening'],               desc: 'Kendi likörlerini damıtan simya kokteyl barı (World\'s 50 Best Bars).' },
   { id: 'mariposa',   name: 'Mariposa Negra',             cat: 'night',  area: 'El Born',           addr: 'Plaça de les Olles 4',            url: 'https://mariposanegrabar.com/',    icon: 'fa-wand-magic-sparkles', res: false, kid: false, best: ['evening'],           desc: 'Eski Savoy American Bar şefi Luca Corradini\'nin barı; el yapımı seramik/3D baskı bardaklarda kokteyller.' },
   { id: 'gatsby',     name: 'Gatsby Barcelona',           cat: 'night',  area: 'Sant Gervasi',      addr: 'Carrer de Tuset 19',              url: 'https://gatsbybarcelona.com/',     icon: 'fa-masks-theater',   res: true,  kid: false, best: ['evening'],               desc: 'Canlı müzik, dans ve kabare gösterili dinner-show (çocuksuz gece).' },
-  { id: 'hyrox',      name: 'HYROX Barcelona',            cat: 'sport',  area: 'Fira Gran Via',     addr: 'Fira Barcelona Gran Via, Av. Joan Carles I 64, L\'Hospitalet de Llobregat', url: 'https://hyrox.com/event/hyrox-barcelona-2/', icon: 'fa-dumbbell', res: true, kid: true, best: ['morning'], desc: 'Pazar 15 Kasım sabahı Men\'s Doubles: Mertcan & Atay. Aileler tribünde ya da yarış sürerken Park Güell\'de.' }
+  { id: 'hyrox',      name: 'HYROX Barcelona',            cat: 'sport',  area: 'Fira Gran Via',     addr: 'Fira Barcelona Gran Via, Av. Joan Carles I 64, L\'Hospitalet de Llobregat', url: 'https://hyrox.com/event/hyrox-barcelona-2/', icon: 'fa-dumbbell', res: true, kid: true, best: ['morning'], desc: 'Pazar 15 Kasım sabahı Men\'s Doubles: Mertcan & Atay. Aileler tribünde ya da yarış sürerken Park Güell\'de.' },
+
+  // Atay'ın öneri listesinden gelen mekanlar (notları ATAY_TIPS'te)
+  { id: 'salut',      name: 'Salut Bistro',               cat: 'coffee', area: 'Eixample',          addr: "Carrer d'Enric Granados 58",      icon: 'fa-mug-saucer',      res: false, kid: true,  best: ['morning'],               desc: 'Gündüz özel kahve ve brunch, akşam şarap bistrosu.' },
+  { id: 'candende',   name: 'Can Dendê',                  cat: 'coffee', area: 'Poblenou',          addr: 'Carrer de la Ciutat de Granada 44', url: 'https://candende.com/',          icon: 'fa-egg',             res: false, kid: true,  best: ['morning', 'lunch_nap'],  desc: 'Brezilya dokunuşlu sevilen brunch: dulce de leche\'li pancake, avokadolu tost. Pzt–Çar kapalı; rezervasyon almıyor, hafta sonu erken gidin.' },
+  { id: 'cecconis',   name: "Cecconi's Barcelona",        cat: 'food',   area: 'Port Vell',         addr: 'Passeig de Colom 20',             url: 'https://www.cecconisrestaurants.com/barcelona/', icon: 'fa-utensils', res: true, kid: true, best: ['morning', 'lunch_nap'], desc: 'Soho House binasında Kuzey İtalyan restoranı, limana yakın. Pazar brunch\'ı meşhur.' },
+  { id: 'brunchitborn', name: 'Brunchit El Born',         cat: 'coffee', area: 'El Born',           addr: 'Carrer de Sant Pere Més Alt 31-33', url: 'https://brunchit.es/en/restaurantes/el-born/', icon: 'fa-egg', res: false, kid: true, best: ['morning'], desc: 'Popüler brunch zincirinin El Born şubesi.' },
+  { id: 'cremat',     name: 'Cremat 11',                  cat: 'coffee', area: 'El Born',           addr: 'Carrer del Cremat Gran 11',       icon: 'fa-mug-saucer',      res: false, kid: true,  best: ['morning'],               desc: 'Picasso Müzesi\'nin yakınında küçük brunch mekanı.' },
+  { id: 'tortillez',  name: 'Los Tortíllez',              cat: 'food',   area: 'Eixample',          addr: 'Carrer del Consell de Cent 299',  url: 'https://www.lostortillez.com/',    icon: 'fa-egg',             res: false, kid: true,  best: ['morning', 'lunch_nap'],  desc: 'Tortilla de patatas (İspanyol omleti) üzerine kurulu bar: trüflü, karamelize soğanlı çeşitler ve kroketler.' },
+  { id: 'brunchit',   name: 'Brunchit Eixample',          cat: 'coffee', area: 'Eixample',          addr: "Carrer d'Aragó 352",              url: 'https://brunchit.es/en/restaurantes/brunch-barcelona-eixample/', icon: 'fa-egg', res: false, kid: true, best: ['morning'], desc: 'Popüler brunch zinciri. Bu şube Çarşamba kapalı.' },
+  { id: 'lato',       name: 'Lato',                       cat: 'coffee', area: 'Eixample',          addr: 'Carrer del Bruc 118',             icon: 'fa-mug-saucer',      res: false, kid: true,  best: ['morning'],               desc: 'And mutfağı esintili brunch: ceviche, muzlu omlet, bol vegan seçenek.' },
+  { id: 'zenith',     name: 'Zenith',                     cat: 'coffee', area: 'Eixample',          addr: 'Gran Via de les Corts Catalanes 633', icon: 'fa-mug-saucer',  res: false, kid: true,  best: ['morning'],               desc: 'Gün boyu brunch ve özel içecekler; vegan ve glütensiz seçenekler.' },
+  { id: 'billy',      name: 'Billy Brunch Headquarters',  cat: 'coffee', area: 'Eixample',          addr: 'Carrer de Muntaner 64',           url: 'https://billybrunch.com/',         icon: 'fa-egg',             res: false, kid: true,  best: ['morning'],               desc: 'Billy Brunch zincirinin ilk mekanı; tavuklu arka bahçesiyle bilinir.' },
+  { id: 'alsur',      name: 'Alsur Café',                 cat: 'coffee', area: 'Eixample',          addr: 'Carrer de Roger de Llúria 23',    url: 'https://www.alsurcafe.com/',       icon: 'fa-mug-hot',         res: false, kid: true,  best: ['lunch_nap', 'morning'],  desc: 'Gün boyu brunch ve hafif yemek. El Born\'da da şubeleri var.' },
+  { id: 'surfhouse',  name: 'Surf House Barcelona',       cat: 'food',   area: 'Barceloneta',       addr: 'Platja de la Barceloneta',        url: 'https://www.surfhousebarcelona.com/', icon: 'fa-burger',       res: false, kid: true,  best: ['lunch_nap', 'afternoon'], desc: 'Sahilde sörf kafe: burger, nachos, smoothie ve kokteyl.' },
+  { id: 'caravelle',  name: 'Caravelle',                  cat: 'food',   area: 'El Raval',          addr: 'Carrer del Pintor Fortuny 31',    icon: 'fa-pepper-hot',      res: false, kid: true,  best: ['lunch_nap', 'morning'],  desc: 'Kendi birasını yapan kafe-gastropub: brunch, taco ve bowl\'lar. Boqueria\'ya birkaç dakika.' },
+  { id: 'xampanyet',  name: 'El Xampanyet',               cat: 'food',   area: 'El Born',           addr: 'Carrer de Montcada 22',           icon: 'fa-wine-bottle',     res: false, kid: false, best: ['afternoon', 'evening'],  desc: 'Picasso Müzesi\'nin karşısında, ev yapımı köpüklü "xampanyet"i ve hamsi tapaslarıyla klasik bar. Ayakta ve kalabalık.' },
+  { id: 'cerveceria', name: 'Cervecería Catalana',        cat: 'food',   area: 'Eixample',          addr: 'Carrer de Mallorca 236',          icon: 'fa-beer-mug-empty',  res: false, kid: true,  best: ['evening', 'lunch_nap'],  desc: 'Şehrin en sevilen klasik tapas barlarından; uzun montadito ve tapas tezgahı. Sıra olabilir.' },
+  { id: 'petittapas', name: 'Petit Tapas',                cat: 'food',   area: 'Barri Gòtic',       addr: 'Carrer Ample 26',                 url: 'https://petittapas.com/',          icon: 'fa-utensils',        res: true,  kid: true,  best: ['evening'],               desc: 'Gotik Mahalle\'de samimi tapas ve paylaşımlık tabaklar, iyi şarap. Sitesinden rezervasyon.' },
+  { id: 'ciutatcomtal', name: 'Ciutat Comtal',            cat: 'food',   area: 'Eixample',          addr: 'Rambla de Catalunya 18',          icon: 'fa-utensils',        res: false, kid: true,  best: ['evening', 'lunch_nap'],  desc: 'Rambla de Catalunya\'da çok popüler tapas barı; akşamları kalabalık.' },
+  { id: 'pacomeralgo', name: 'Paco Meralgo',              cat: 'food',   area: 'Eixample',          addr: 'Carrer de Muntaner 171',          url: 'https://restaurantpacomeralgo.com/', icon: 'fa-fish',          res: true,  kid: true,  best: ['evening'],               desc: '"Alta taberna": taze deniz ürünleri ağırlıklı klasik tapas.' },
+  { id: 'ocana',      name: 'Ocaña',                      cat: 'food',   area: 'Barri Gòtic',       addr: 'Plaça Reial 13-15',               url: 'https://www.ocana.cat/',           icon: 'fa-utensils',        res: false, kid: true,  best: ['evening'],               desc: 'Plaça Reial\'de restoran, kafe ve kokteyl barı; meydana bakan teras.' },
+  { id: 'desoriente', name: 'Desoriente',                 cat: 'food',   area: 'Eixample',          addr: 'Desoriente Eixample',             icon: 'fa-fish',            res: true,  kid: false, best: ['evening'],               desc: 'Japon–Akdeniz füzyonu, tadım menüsü; küçük salon, rezervasyon iyi olur.' },
+  { id: 'honestgreens', name: 'Honest Greens Tuset',      cat: 'food',   area: 'Sant Gervasi',      addr: 'Carrer de Tuset 4',               url: 'https://www.honestgreens.com/en/restaurants/tuset-en/', icon: 'fa-leaf', res: false, kid: true, best: ['lunch_nap', 'evening'], desc: 'Taze, sağlıklı tabaklar ve bowl\'lar; hızlı servis, çocuklarla rahat.' },
+  { id: 'trebol',     name: 'Xurreria Trébol',            cat: 'coffee', area: 'Gràcia',            addr: 'Carrer de Còrsega 341',           icon: 'fa-cookie',          res: false, kid: true,  best: ['afternoon', 'evening'],  desc: '1950\'den beri churro ve sıcak çikolata; La Pepita\'nın hemen yanında.' }
 ];
+
+// Atay'ın öneri listesi: havuzda "Atay'ın önerileri" filtresiyle bölüm bölüm görünür
+const ATAY_SECTIONS = [
+  { key: 'kahvalti', label: 'Kahvaltı' },
+  { key: 'yakin',    label: 'Otele yakın kahvaltı' },
+  { key: 'eixample', label: 'Kahvaltı · Eixample' },
+  { key: 'oglen',    label: 'Öğlen' },
+  { key: 'tapas',    label: 'Tapas' },
+  { key: 'aksam',    label: 'Akşam yemeği' },
+  { key: 'alt',      label: 'Alternatif' }
+];
+
+const ATAY_TIPS = {
+  salut:        { sec: 'kahvalti', note: '2 km, ~20 dk Uber.' },
+  candende:     { sec: 'kahvalti', note: '3 km, ~20 dk arabayla.' },
+  lapapa:       { sec: 'kahvalti', note: 'Geç kahvaltı için Pau Claris şubesi (190): 1,8 km, ~18 dk Uber.' },
+  cecconis:     { sec: 'kahvalti', note: 'Pazarları açık, kahvaltısı çok iyi. Sahilde, 1 km yürüme.' },
+  malvon:       { sec: 'kahvalti', note: '450 m, 7 dk yürüme. Kıymalı börek tadında.' },
+  hofmann:      { sec: 'kahvalti', note: 'Kruvasan. 950 m, 12 dk yürüme (Picasso Müzesi\'nin orada).' },
+  caravelle:    { sec: 'yakin',    note: '700 m, 9 dk yürüme. Öğlen listesinde "Carabela Cafe" diye de var: Meksika yemekleri, nachos ve margaritaları çok iyi.' },
+  brunchitborn: { sec: 'yakin',    note: '650 m, 9 dk yürüme.' },
+  cremat:       { sec: 'yakin',    note: '750 m, 10 dk yürüme.' },
+  tortillez:    { sec: 'eixample', note: 'İspanyol omleti. 1,3 km, 18 dk yürüme (yukarıda).' },
+  brunchit:     { sec: 'eixample', note: '1,8 km, 25 dk yürüme (yukarıda).' },
+  lato:         { sec: 'eixample', note: '1,8 km, 25 dk yürüme (yukarıda).' },
+  zenith:       { sec: 'eixample', note: '1,1 km, 15 dk yürüme.' },
+  billy:        { sec: 'eixample', note: '1,5 km, 22 dk yürüme.' },
+  alsur:        { sec: 'oglen',    note: '1 km, 13 dk yürüme (yukarı kısımda).' },
+  surfhouse:    { sec: 'oglen',    note: 'Uber + yürüme ~25 dk (marinada).' },
+  xampanyet:    { sec: 'tapas',    note: '800 m, 11 dk yürüme.' },
+  petittapas:   { sec: 'tapas',    note: '700 m, 10 dk.' },
+  cerveceria:   { sec: 'tapas',    note: 'Akşam yemeği için de: 1,6 km, 23 dk yürüme ya da 18 dk Uber.' },
+  ciutatcomtal: { sec: 'tapas',    note: 'Akşam yemeği için de: 900 m, 13–15 dk yürüme. Akşam rezervasyon gerekebilir.' },
+  fritas:       { sec: 'aksam',    note: 'Patates kızartmacısı. 700 m, 9 dk.' },
+  gatsby:       { sec: 'aksam',    note: '2,5 km, ~20 dk Uber (yukarıda).' },
+  drymartini:   { sec: 'aksam',    note: 'Kokteyl deneyin! 2,2 km, ~15 dk Uber (yukarıda).' },
+  pizzalocal:   { sec: 'aksam',    note: '550 m, 7 dk yürüme.' },
+  pacomeralgo:  { sec: 'aksam',    note: '~20 dk Uber.' },
+  ocana:        { sec: 'aksam',    note: '700 m, 9 dk yürüme.' },
+  desoriente:   { sec: 'aksam',    note: 'Japon ve Akdeniz mutfağı. 1,7 km, 15 dk Uber.' },
+  sartoria:     { sec: 'alt',      note: 'Dünyanın en iyi ikinci pizzacısı. 1,9 km, 18 dk Uber.' },
+  honestgreens: { sec: 'alt',      note: '2,4 km, 19 dk Uber.' },
+  trebol:       { sec: 'alt',      note: 'Tatlıcı. 2 km, 18 dk Uber.' }
+};
 
 // Silinemeyen, takvime sabit olaylar
 const FIXED_EVENTS = {
@@ -174,5 +242,6 @@ const PRACTICAL = [
   { icon: 'fa-baby-carriage', title: 'Puset stratejisi', text: 'Gündüz kısa pusetsiz keşif. Akşam uzun yürüyüş veya geç yemekte puset gelir; Demir 21:00 civarı pusette uyuyabilir.' },
   { icon: 'fa-burger', title: 'Kriz önleyici', text: 'Bekleme yok: Pizza Local ve Empanadas Malvón kilit noktalarda.' },
   { icon: 'fa-bus', title: 'Ulaşım', text: 'Havalimanı: taksi ~30–35 dk veya Aerobús (Plaça Catalunya). Şehir içi metro + T-Casual (10 biniş, 13 €); T-Casual havalimanı metro istasyonlarında geçmez.' },
-  { icon: 'fa-phone', title: 'Acil', text: 'Avrupa acil hattı 112. Eczane: yeşil haç tabelası.' }
+  { icon: 'fa-phone', title: 'Acil', text: 'Avrupa acil hattı 112. Eczane: yeşil haç tabelası.' },
+  { icon: 'fa-route', title: 'Otelden mesafeler (Atay)', text: 'Yürüme: El Corte Inglés 6 dk (400 m) · Boqueria 7 dk (500 m) · Picasso Müzesi 10 dk (700 m) · Zoo 20 dk (1,5 km). Uber: Arenas de Barcelona 19 dk · Sagrada Família 22 dk · Zoo 24 dk · Havalimanı 27 dk · Park Güell 28 dk · Camp Nou 30 dk.' }
 ];
