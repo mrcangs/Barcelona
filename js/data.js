@@ -151,8 +151,10 @@ const ATAY_TIPS = {
 const FIXED_EVENTS = {
   day1: {
     morning: [
-      { time: '09:10', title: 'TK1853 IST → BCN (varış 10:55)', icon: 'fa-plane-departure' },
-      { time: '11:45', title: 'Havalimanından otele transfer', icon: 'fa-taxi' },
+      { time: '09:10', title: 'TK1853 IST → BCN (varış 10:55)', icon: 'fa-plane-departure' }
+    ],
+    // Transfer (10:55) veritabanında PDF'li plan kartı olarak duruyor; check-in onun ardından
+    lunch_nap: [
       { time: '12:15', title: 'Otele check-in, bavulları bırak', icon: 'fa-hotel' }
     ]
   },

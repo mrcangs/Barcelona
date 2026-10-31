@@ -306,7 +306,7 @@
     return `<article data-action="detail" data-day="${day}" data-slot="${slot}" data-key="${key}" draggable="true" data-drag-item="1"
       class="surface rounded-xl p-3 cursor-pointer hover:shadow-md transition ${item.confirmed ? 'ring-accent' : ''}">
       <div class="flex items-start gap-3">
-        <span class="tag-${esc(cat)} w-9 h-9 shrink-0 rounded-xl flex items-center justify-center"><i class="fa-solid ${act.icon || 'fa-star'}" aria-hidden="true"></i></span>
+        <span class="tag-${esc(cat)} w-9 h-9 shrink-0 rounded-xl flex items-center justify-center"><i class="fa-solid ${act.icon || (/^fa-[a-z-]+$/.test(item.icon || '') ? item.icon : 'fa-star')}" aria-hidden="true"></i></span>
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-1.5 flex-wrap">
             <h4 class="text-sm font-extrabold leading-snug">${esc(itemName(item))}</h4>
@@ -316,7 +316,7 @@
             ${item.note ? `<span class="tag surface2 muted" title="${esc(T('info.hasNote'))}"><i class="fa-solid fa-note-sticky" aria-hidden="true"></i></span>` : ''}
           </div>
           <div class="flex items-center gap-1.5 mt-1 flex-wrap text-[11px] muted">
-            ${area ? `<span>${esc(area)}</span>` : ''}
+            ${area ? `<span class="truncate max-w-full">${esc(area)}</span>` : ''}
             ${groupChips(item.groups)}
             ${by ? `<span class="inline-flex items-center gap-1">· <span class="w-3.5 h-3.5 rounded-full inline-block" style="background:${by.color}"></span>${esc(by.name)}</span>` : ''}
           </div>
@@ -361,7 +361,7 @@
       const sugg = (((SUGGESTED_PLAN[d.key] || {})[slot.key]) || []).filter(s => !takenIds.has(s.id));
       const isClosed = !!closed[slot.key];
 
-      html += `<section class="grid grid-cols-[44px_1fr] gap-2.5 ${status === 'past' ? 'past' : ''}">
+      html += `<section class="grid grid-cols-[44px_minmax(0,1fr)] gap-2.5 ${status === 'past' ? 'past' : ''}">
         <div class="pt-3 text-right">
           <div class="text-xs font-extrabold">${slot.start}</div>
           <div class="text-[10px] muted">${slot.end}</div>
@@ -751,7 +751,7 @@
           ${atayTip(item.activityId)}
           <div class="flex flex-wrap gap-2">
             ${act.url ? `<a href="${esc(act.url)}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-globe accent" aria-hidden="true"></i> ${esc(T('link.web'))}</a>` : ''}
-            <a href="${esc(mapsFor({ name, addr: act.addr, area }))}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i> ${esc(T('link.mapOpen'))}</a>
+            ${item.noMap ? '' : `<a href="${esc(mapsFor({ name, addr: act.addr, area }))}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-location-dot terra" aria-hidden="true"></i> ${esc(T('link.mapOpen'))}</a>`}
           </div>
 
           <div>

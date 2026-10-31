@@ -211,10 +211,9 @@ const CONTENT_ES = {
     hyrox:      { desc: 'Domingo 15 de noviembre por la mañana, Men\'s Doubles: Mertcan y Atay. Las familias, en la grada o en Park Güell durante la carrera.' }
   },
   fixed: {
-    day1: { morning: [
-      { title: 'TK1853 IST → BCN (llegada 10:55)' },
-      { title: 'Traslado del aeropuerto al hotel' },
-      { title: 'Check-in en el hotel, dejar las maletas' } ] },
+    day1: {
+      morning: [ { title: 'TK1853 IST → BCN (llegada 10:55)' } ],
+      lunch_nap: [ { title: 'Check-in en el hotel, dejar las maletas' } ] },
     day5: { morning: [ { time: 'Mañana', title: 'HYROX Men\'s Doubles · Mertcan y Atay · Fira Gran Via' } ] },
     day6: { morning: [
       { title: 'Desayuno + cruasanes para llevar de Hofmann' },
