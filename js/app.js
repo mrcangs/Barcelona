@@ -77,9 +77,11 @@
   const fileSize = n => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
 
   // Serbest metindeki http(s) linklerini tıklanabilir yapar; geri kalan her şey kaçışlı
+  // Uzun linkler alan adı + "…" olarak gösterilir, href tam kalır
   function linkify(text) {
+    const short = url => url.length <= 40 ? url : url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] + '/…';
     return String(text || '').split(/(https?:\/\/[^\s]+)/g).map((part, i) => i % 2
-      ? `<a href="${esc(part)}" target="_blank" rel="noopener" class="accent underline break-all">${esc(part)}</a>`
+      ? `<a href="${esc(part)}" target="_blank" rel="noopener" class="accent underline break-all">${esc(short(part))}</a>`
       : esc(part)).join('');
   }
 
@@ -449,9 +451,9 @@
           <span class="tag tag-${esc(a.cat)}">${esc(catLabel)}</span>
           ${a.res ? `<span class="tag tag-res"><i class="fa-solid fa-ticket" aria-hidden="true"></i> ${esc(T('pool.res'))}</span>` : ''}
           ${a.kid ? '<span class="tag surface2 muted"><i class="fa-solid fa-child" aria-hidden="true"></i></span>' : ''}
-          ${a.area ? `<span class="text-[11px] muted">${esc(a.area)}</span>` : ''}
+          ${a.area ? `<span class="text-[11px] muted truncate max-w-full">${esc(a.area)}</span>` : ''}
         </div>
-        <p class="text-xs muted mt-1 leading-snug">${esc(a.desc)}</p>
+        <p class="text-xs muted mt-1 leading-snug [overflow-wrap:anywhere]">${linkify(a.desc)}</p>
         ${atayTip(a.id)}
         ${linkButtons(a)}
       </div>
@@ -745,9 +747,9 @@
           <div class="flex flex-wrap gap-1.5 items-center">
             <span class="tag tag-${esc(item.cat || 'custom')}">${esc((catOf(item.cat) || { label: T('pool.teamIdea') }).label)}</span>
             ${act.res ? `<span class="tag tag-res"><i class="fa-solid fa-ticket" aria-hidden="true"></i> ${esc(T('item.resNeeded'))}</span>` : ''}
-            ${area ? `<span class="text-xs muted">${esc(area)}</span>` : ''}
+            ${area ? `<span class="text-xs muted truncate max-w-full">${esc(area)}</span>` : ''}
           </div>
-          ${desc ? `<p class="text-sm leading-relaxed">${esc(desc)}</p>` : ''}
+          ${desc ? `<p class="text-sm leading-relaxed [overflow-wrap:anywhere]">${linkify(desc)}</p>` : ''}
           ${atayTip(item.activityId)}
           <div class="flex flex-wrap gap-2">
             ${act.url ? `<a href="${esc(act.url)}" target="_blank" rel="noopener" class="h-10 px-4 rounded-xl btn-ghost inline-flex items-center gap-2 text-sm font-bold"><i class="fa-solid fa-globe accent" aria-hidden="true"></i> ${esc(T('link.web'))}</a>` : ''}
