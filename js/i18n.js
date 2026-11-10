@@ -243,7 +243,7 @@ const CONTENT_ES = {
   },
   checklistCats: { 'Bilet': 'Entradas', 'Rezervasyon': 'Reservas', 'HYROX': 'HYROX', 'Ulaşım': 'Transporte', 'Bavul': 'Maleta' },
   checklist: {
-    sagrada: 'Entrada a la Sagrada Família con torres',
+    sagrada: 'Visita guiada a la Sagrada Família (jue 12 nov 16:00)',
     guell: 'Entrada con hora al Park Güell',
     catedral: 'Entrada a la Catedral de Barcelona',
     picasso: 'Entrada al Museu Picasso (dom 15 nov 10:45)',

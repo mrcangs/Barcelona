@@ -221,7 +221,7 @@ const SUGGESTED_PLAN = {
 
 // url: resmi bilet / rezervasyon sayfası (Ekim 2026'da kontrol edildi)
 const CHECKLIST = [
-  { id: 'sagrada',   text: 'Sagrada Família kuleli bilet', cat: 'Bilet', url: 'https://sagradafamilia.org/en/tickets' },
+  { id: 'sagrada',   text: 'Sagrada Família rehberli tur (Per 12 Kas 16:00)', cat: 'Bilet', url: 'https://sagradafamilia.org/en/tickets' },
   { id: 'guell',     text: 'Park Güell saatli bilet', cat: 'Bilet', url: 'https://parkguell.barcelona/en/buy-tickets' },
   { id: 'catedral',  text: 'Barselona Katedrali bileti', cat: 'Bilet', url: 'https://tickets.catedralbcn.org/en' },
   { id: 'picasso',   text: 'Picasso Müzesi bileti (Paz 15 Kas 10:45)', cat: 'Bilet', url: 'https://museupicassobcn.cat/en/plan-your-visit/buy-tickets-and-opening-hours' },
