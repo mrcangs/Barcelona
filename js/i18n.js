@@ -187,6 +187,7 @@ const CONTENT_ES = {
     pepita:     { desc: 'Bar de bocadillos gourmet y tapas de autor, informal y acogedor. Ideal para celebrar el HYROX.' },
     sartoria:   { desc: 'Entre las mejores del mundo en 50 Top Pizza; elegida la mejor pizzería de Europa fuera de Italia. Segundo local en el Eixample (Provença 330). Reserva en su web.' },
     positano:   { desc: 'Pizzería napolitana de tres napolitanos: masa fermentada 48 horas, horno de leña.' },
+    nuevereinas: { desc: 'Parrilla argentina: carnes a la brasa, empanadas y milanesas. Cerca de Passeig de Gràcia.' },
     leromane:   { desc: 'Pizza al estilo romano, pasta y vinos italianos. Cada uno elige dos sabores y la pizza se comparte en porciones. Abierto todos los días desde las 13:00 hasta tarde.' },
     madmad:     { desc: 'Hamburguesería 100% vegetal. Abierto todos los días desde las 12:30 hasta tarde.' },
     hofmann:    { desc: 'El famoso cruasán de mascarpone. Premio de la tarde cuando Demir se despierta.' },
