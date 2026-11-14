@@ -425,14 +425,14 @@
     const q = state.poolQuery.trim().toLocaleLowerCase(LANG);
     const tip = a => ATAY_TIPS[a.id];
     let list = allActivities().filter(a =>
-      (state.poolCat === 'all' || (state.poolCat === 'atay' ? !!tip(a) : a.cat === state.poolCat)) &&
+      (state.poolCat === 'all' || (state.poolCat === 'atay' ? !!tip(a) : state.poolCat === 'tapas' ? !!tapasOf(a.id) : a.cat === state.poolCat)) &&
       (!q || `${a.name} ${a.area} ${a.desc} ${tip(a) ? tip(a).note : ''}`.toLocaleLowerCase(LANG).includes(q)));
     if (targetSlot) list = list.slice().sort((a, b) => (b.best.includes(targetSlot) ? 1 : 0) - (a.best.includes(targetSlot) ? 1 : 0));
     return list;
   }
 
   function catChipsHtml() {
-    const chips = [{ key: 'all', label: T('pool.all'), icon: 'fa-border-all' }, { key: 'atay', label: T('pool.atay'), icon: 'fa-star' }].concat(CATEGORIES);
+    const chips = [{ key: 'all', label: T('pool.all'), icon: 'fa-border-all' }, { key: 'atay', label: T('pool.atay'), icon: 'fa-star' }, { key: 'tapas', label: T('pool.tapas'), icon: 'fa-wine-glass' }].concat(CATEGORIES);
     return chips.map(c => `<button data-action="pool-cat" data-cat="${c.key}" class="shrink-0 h-9 px-3 rounded-full text-xs font-bold flex items-center gap-1.5 ${state.poolCat === c.key ? 'btn-accent' : 'surface'}"><i class="fa-solid ${c.icon}" aria-hidden="true"></i>${esc(c.label)}</button>`).join('');
   }
 
@@ -454,6 +454,7 @@
           ${a.area ? `<span class="text-[11px] muted truncate max-w-full">${esc(a.area)}</span>` : ''}
         </div>
         <p class="text-xs muted mt-1 leading-snug [overflow-wrap:anywhere]">${linkify(a.desc)}</p>
+        ${tapasTip(a.id)}
         ${atayTip(a.id)}
         ${linkButtons(a)}
       </div>
@@ -468,9 +469,22 @@
     return `<p class="text-[11px] mt-1.5 rounded-lg surface2 px-2 py-1.5 flex gap-1.5 items-start leading-snug">${avatar('atay', 'w-4 h-4 text-[8px] mt-px')}<span><strong>Atay:</strong> ${esc(tip.note)}</span></p>`;
   }
 
+  const tapasOf = id => TAPAS_LIST.find(t => t.id === id);
+
+  function tapasTip(id) {
+    const t = tapasOf(id);
+    if (!t) return '';
+    const stars = '<i class="fa-solid fa-star text-amber-500" aria-hidden="true"></i>'.repeat(t.stars);
+    return `<p class="text-[11px] mt-1.5 flex gap-1.5 items-center"><i class="fa-solid fa-wine-glass terra" aria-hidden="true"></i><strong>${esc(T('pool.tapas'))}</strong>${stars}${t.note ? `<span class="muted">· ${esc(t.note)}</span>` : ''}</p>`;
+  }
+
   // Atay filtresinde liste, onun kâğıdındaki bölümlere göre başlıklarla gruplanır
   function poolListHtml(list, targetSlot) {
     if (!list.length) return `<p class="text-sm muted text-center py-6">${esc(T('pool.none'))}</p>`;
+    if (state.poolCat === 'tapas') {
+      const order = id => TAPAS_LIST.findIndex(t => t.id === id);
+      return list.slice().sort((a, b) => order(a.id) - order(b.id)).map(a => poolCard(a, targetSlot)).join('');
+    }
     if (state.poolCat !== 'atay') return list.map(a => poolCard(a, targetSlot)).join('');
     return ATAY_SECTIONS.map(sec => {
       const items = list.filter(a => ATAY_TIPS[a.id].sec === sec.key);

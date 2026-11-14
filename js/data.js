@@ -101,6 +101,9 @@ const POOL = [
   { id: 'ocana',      name: 'Ocaña',                      cat: 'food',   area: 'Barri Gòtic',       addr: 'Plaça Reial 13-15',               url: 'https://www.ocana.cat/',           icon: 'fa-utensils',        res: false, kid: true,  best: ['evening'],               desc: 'Plaça Reial\'de restoran, kafe ve kokteyl barı; meydana bakan teras.' },
   { id: 'desoriente', name: 'Desoriente',                 cat: 'food',   area: 'Eixample',          addr: 'Desoriente Eixample',             icon: 'fa-fish',            res: true,  kid: false, best: ['evening'],               desc: 'Japon–Akdeniz füzyonu, tadım menüsü; küçük salon, rezervasyon iyi olur.' },
   { id: 'honestgreens', name: 'Honest Greens Tuset',      cat: 'food',   area: 'Sant Gervasi',      addr: 'Carrer de Tuset 4',               url: 'https://www.honestgreens.com/en/restaurants/tuset-en/', icon: 'fa-leaf', res: false, kid: true, best: ['lunch_nap', 'evening'], desc: 'Taze, sağlıklı tabaklar ve bowl\'lar; hızlı servis, çocuklarla rahat.' },
+  { id: 'vinitus',    name: 'Vinitus',                    cat: 'food',   area: 'Eixample',          addr: 'Carrer del Consell de Cent 333',  icon: 'fa-wine-glass',      res: false, kid: true,  best: ['lunch_nap', 'evening'],  desc: 'Passeig de Gràcia yakınında çok sevilen tapas barı. Rezervasyon yok, sıraya giriliyor; erken gidin.' },
+  { id: 'jaica',      name: 'Bar Jai-Ca',                 cat: 'food',   area: 'Barceloneta',       addr: 'Carrer de Ginebra 13',            url: 'https://barjaica.com/',            icon: 'fa-utensils',         res: false, kid: true,  best: ['lunch_nap', 'afternoon'], desc: '1955\'ten beri Barceloneta\'da tapas ve vermut barı; hep kalabalık.' },
+  { id: 'botafumeiro', name: 'Botafumeiro',               cat: 'food',   area: 'Gràcia',            addr: 'Carrer Gran de Gràcia 81',        icon: 'fa-fish',            res: true,  kid: true,  best: ['evening', 'lunch_nap'],  desc: 'Lüks Galiçya usulü deniz ürünleri restoranı (marisquería).' },
   { id: 'trebol',     name: 'Xurreria Trébol',            cat: 'coffee', area: 'Gràcia',            addr: 'Carrer de Còrsega 341',           icon: 'fa-cookie',          res: false, kid: true,  best: ['afternoon', 'evening'],  desc: '1950\'den beri churro ve sıcak çikolata; La Pepita\'nın hemen yanında.' }
 ];
 
@@ -113,6 +116,18 @@ const ATAY_SECTIONS = [
   { key: 'tapas',    label: 'Tapas' },
   { key: 'aksam',    label: 'Akşam yemeği' },
   { key: 'alt',      label: 'Alternatif' }
+];
+
+// Tapascılar listesi (yıldızlar listedeki gibi); havuzda "Tapascılar" filtresiyle bu sırada görünür
+const TAPAS_LIST = [
+  { id: 'xampanyet',    stars: 1 },
+  { id: 'cerveceria',   stars: 1 },
+  { id: 'petittapas',   stars: 2 },
+  { id: 'vinitus',      stars: 0 },
+  { id: 'ciutatcomtal', stars: 2 },
+  { id: 'jaica',        stars: 0 },
+  { id: 'botafumeiro',  stars: 1, note: 'lüks' },
+  { id: 'nacional',     stars: 0, note: 'gün içinde bir bakın derim' }
 ];
 
 const ATAY_TIPS = {
