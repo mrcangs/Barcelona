@@ -51,6 +51,21 @@
             ".validate": "newData.hasChildren(['user', 'text', 'timestamp']) && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 500 && newData.child('user').val().matches(/^(mertcan|elif|atay|alev|cagatay|maribel)$/)"
           }
         },
+        "reviews": {
+          "$act": {
+            ".validate": "$act.length <= 80",
+            "$p": {
+              ".validate": "$p.matches(/^(mertcan|elif|atay|alev|cagatay|maribel)$/) && newData.hasChildren(['went', 'at'])",
+              "went": { ".validate": "newData.isBoolean()" },
+              "rating": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5 && newData.val() % 1 === 0" },
+              "kids": { ".validate": "newData.isString() && newData.val().matches(/^(loved|ok|no)$/)" },
+              "again": { ".validate": "newData.isBoolean()" },
+              "note": { ".validate": "newData.isString() && newData.val().length <= 300" },
+              "at": { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          }
+        },
         "$other": {
           ".validate": false
         }

@@ -100,6 +100,7 @@
     view: LS.get(LS_VIEW) === 'summary' ? 'summary' : 'day',
     poolCat: 'all',
     poolQuery: '',
+    reviewView: 'mine',
     data: {},
     loaded: false,
     sheet: null
@@ -262,6 +263,13 @@
       b.classList.toggle('accent', on);
       b.classList.toggle('muted', !on);
     });
+    // Değerlendirme masaüstünde de 3 kolonun yerine geçer (lg:grid, hidden sınıfını ezdiği için style ile)
+    const rev = state.tab === 'review';
+    $('#mainGrid').style.display = rev ? 'none' : '';
+    $('#reviewMain').classList.toggle('hidden', !rev);
+    $('#reviewToggle').innerHTML = rev
+      ? `<i class="fa-solid fa-calendar-days" aria-hidden="true"></i><span>${esc(T('nav.plan'))}</span>`
+      : `<i class="fa-solid fa-star text-amber-500" aria-hidden="true"></i><span>${esc(T('nav.review'))}</span>`;
   }
 
   // ---------- RENDER: gün çipleri ----------
@@ -578,6 +586,139 @@
     </div>`;
   }
 
+  // ---------- RENDER: değerlendirme (seyahat sonrası anket) ----------
+  // Kişi başı puanlar: reviews/<activityId>/<kişi> = { went, rating, kids, again, note, at }
+  const KIDS_OPTS = [{ v: 'loved', e: '😍' }, { v: 'ok', e: '🙂' }, { v: 'no', e: '😕' }];
+  const reviewsOf = id => (D().reviews || {})[id] || {};
+  const myReview = id => reviewsOf(id)[state.me] || null;
+  const isReviewed = r => !!r && (r.went === false || !!r.rating);
+  const decimal = n => n.toFixed(1).replace('.', ',');
+
+  // Plandaki her yer bir kez (ilk geçtiği gün sırasıyla) + planda olmayıp birinin "gittik" dediği yerler.
+  // Havuzda/kendi önerilerde karşılığı olmayan kalemler (havalimanı transferi gibi) ankete girmez.
+  function reviewPlaces() {
+    const map = new Map();
+    DAYS.forEach(d => SLOTS.forEach(sl => {
+      Object.values(slotItems(d.key, sl.key)).forEach(it => {
+        const act = activity(it.activityId);
+        if (!act) return;
+        const e = map.get(act.id) || { act, where: [] };
+        const w = `${d.short} ${d.num} ${sl.label}`;
+        if (!e.where.includes(w)) e.where.push(w);
+        map.set(act.id, e);
+      });
+    }));
+    Object.keys(D().reviews || {}).forEach(id => {
+      const act = !map.has(id) && activity(id);
+      if (act) map.set(id, { act, where: [] });
+    });
+    return [...map.values()];
+  }
+
+  // patch null → kaydı sil; replace → kaydı baştan yaz; yoksa alanları güncelle. Sonuç: başarılı mı
+  function reviewWrite(id, patch, replace) {
+    const ref = tripRef.child(`reviews/${id}/${state.me}`);
+    const val = patch && Object.assign({}, patch, { at: firebase.database.ServerValue.TIMESTAMP });
+    return (replace || !patch ? ref.set(val || null) : ref.update(val))
+      .then(() => true, err => { toast(T('toast.saveFail', { e: err.code })); return false; });
+  }
+
+  function reviewCard(p) {
+    const a = p.act;
+    const id = esc(a.id);
+    const r = myReview(a.id);
+    const done = isReviewed(r);
+    const others = PEOPLE.filter(x => x.id !== state.me && isReviewed(reviewsOf(a.id)[x.id]));
+    const seg = (v, label, icon, on) => `<button data-action="rv-went" data-id="${id}" data-v="${v}" class="h-10 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 ${on ? 'btn-accent' : 'btn-ghost'}"><i class="fa-solid ${icon}" aria-hidden="true"></i>${esc(label)}</button>`;
+    let detail = '';
+    if (r && r.went) {
+      const stars = [1, 2, 3, 4, 5].map(n => `<button data-action="rv-rate" data-id="${id}" data-n="${n}" class="w-10 h-10 rounded-lg text-xl ${r.rating >= n ? 'text-amber-500' : 'muted opacity-40'}" aria-label="${n}/5"><i class="fa-solid fa-star" aria-hidden="true"></i></button>`).join('');
+      const kids = KIDS_OPTS.map(k => `<button data-action="rv-kids" data-id="${id}" data-v="${k.v}" class="h-9 px-2.5 rounded-full text-xs font-bold ${r.kids === k.v ? 'btn-soft ring-accent' : 'surface2'}">${k.e} ${esc(T('rv.kids.' + k.v))}</button>`).join('');
+      detail = `
+        <div class="flex items-center gap-0.5">${stars}${r.rating ? '' : `<span class="text-[11px] terra font-bold ml-2">${esc(T('rv.rateHint'))}</span>`}</div>
+        <div class="flex items-center gap-1.5 flex-wrap"><span class="text-[11px] font-bold muted mr-1">${esc(T('rv.kids'))}</span>${kids}</div>
+        <div class="flex gap-2 flex-wrap">
+          <button data-action="rv-again" data-id="${id}" class="h-9 px-3 rounded-xl text-xs font-bold ${r.again ? 'btn-soft ring-accent' : 'btn-ghost'}"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> ${esc(T('rv.again'))}</button>
+          <button data-action="rv-note" data-id="${id}" class="h-9 px-3 rounded-xl btn-ghost text-xs font-bold"><i class="fa-solid fa-pen" aria-hidden="true"></i> ${esc(T(r.note ? 'rv.noteEdit' : 'rv.noteAdd'))}</button>
+        </div>
+        ${r.note ? `<p class="text-xs rounded-lg surface2 px-2.5 py-2 whitespace-pre-line [overflow-wrap:anywhere]">${esc(r.note)}</p>` : ''}`;
+    }
+    return `<article class="surface rounded-2xl p-3.5 space-y-3 ${done ? '' : 'ring-accent'}">
+      <div class="flex items-start gap-3">
+        <span class="tag-${esc(a.cat)} w-9 h-9 shrink-0 rounded-xl flex items-center justify-center"><i class="fa-solid ${a.icon || 'fa-star'}" aria-hidden="true"></i></span>
+        <div class="min-w-0 flex-1">
+          <h3 class="text-sm font-extrabold leading-snug">${esc(a.name)}${done ? ' <i class="fa-solid fa-circle-check ok text-xs" aria-hidden="true"></i>' : ''}</h3>
+          <p class="text-[11px] muted truncate">${esc(p.where.length ? p.where.join(' · ') : T('rv.extra'))}</p>
+        </div>
+        <span class="flex -space-x-1.5 shrink-0" title="${esc(T('rv.othersDone'))}">${others.map(x => avatar(x.id, 'w-5 h-5 text-[9px] ring-2 ring-white/70')).join('')}</span>
+      </div>
+      <div class="grid grid-cols-2 gap-2">${seg(1, T('rv.went'), 'fa-check', r && r.went === true)}${seg(0, T('rv.notWent'), 'fa-xmark', r && r.went === false)}</div>
+      ${detail}
+    </article>`;
+  }
+
+  function reviewResultsHtml(places) {
+    const rows = places.map(p => {
+      const all = reviewsOf(p.act.id);
+      const rated = PEOPLE.map(x => [x, all[x.id]]).filter(([, r]) => r && r.went && r.rating);
+      const avg = rated.length ? rated.reduce((s, [, r]) => s + r.rating, 0) / rated.length : 0;
+      return { p, rated, avg, again: rated.filter(([, r]) => r.again).length };
+    });
+    const scored = rows.filter(r => r.rated.length).sort((a, b) => b.avg - a.avg || b.rated.length - a.rated.length || b.again - a.again);
+    const unrated = rows.filter(r => !r.rated.length);
+    if (!scored.length) return `<p class="text-sm muted text-center py-8">${esc(T('rv.noResults'))}</p>`;
+    return scored.map((r, i) => `<article class="surface rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-start gap-3">
+          <span class="w-9 h-9 shrink-0 rounded-xl surface2 flex items-center justify-center text-sm font-extrabold">${i + 1}</span>
+          <div class="min-w-0 flex-1">
+            <h3 class="text-sm font-extrabold leading-snug">${esc(r.p.act.name)}</h3>
+            <p class="text-[11px] muted">${esc(T('rv.summary', { n: r.rated.length }) + (r.again ? T('rv.summaryAgain', { a: r.again }) : ''))}</p>
+          </div>
+          <span class="shrink-0 text-lg font-extrabold text-amber-500"><i class="fa-solid fa-star text-sm" aria-hidden="true"></i> ${decimal(r.avg)}</span>
+        </div>
+        <div class="space-y-1.5">${r.rated.map(([x, rv]) => {
+          const kid = KIDS_OPTS.find(k => k.v === rv.kids);
+          return `<div class="flex items-start gap-2 text-xs">
+            ${avatar(x.id, 'w-5 h-5 text-[9px]')}
+            <span class="font-bold shrink-0 mt-0.5">${rv.rating}★</span>
+            ${rv.again ? `<i class="fa-solid fa-rotate-right accent mt-1" title="${esc(T('rv.again'))}" aria-label="${esc(T('rv.again'))}"></i>` : ''}
+            ${kid ? `<span class="mt-0.5" title="${esc(T('rv.kids') + ': ' + T('rv.kids.' + kid.v))}">${kid.e}</span>` : ''}
+            ${rv.note ? `<span class="muted mt-0.5 min-w-0 [overflow-wrap:anywhere]">${esc(rv.note)}</span>` : ''}
+          </div>`;
+        }).join('')}</div>
+      </article>`).join('') +
+      (unrated.length ? `<p class="text-xs muted px-1">${esc(T('rv.unrated'))}: ${unrated.map(r => esc(r.p.act.name)).join(', ')}</p>` : '');
+  }
+
+  function renderReview() {
+    const places = reviewPlaces();
+    const pending = places.filter(p => !isReviewed(myReview(p.act.id))).length;
+    const progress = PEOPLE.map(p => {
+      const n = places.filter(x => isReviewed(reviewsOf(x.act.id)[p.id])).length;
+      return `<div class="flex flex-col items-center gap-1 w-12">${avatar(p.id, 'w-9 h-9 text-sm')}<span class="text-[10px] font-bold ${places.length && n === places.length ? 'ok' : 'muted'}">${n}/${places.length}</span></div>`;
+    }).join('');
+    const views = [['mine', T('rv.mine')], ['results', T('rv.results')]].map(([k, l]) =>
+      `<button data-action="rv-view" data-v="${k}" class="h-10 rounded-xl text-sm font-bold ${state.reviewView === k ? 'btn-accent' : 'surface'}">${esc(l)}</button>`).join('');
+    const body = state.reviewView === 'results'
+      ? reviewResultsHtml(places)
+      : places.map(reviewCard).join('') + `<button data-action="rv-add-open" class="w-full h-12 rounded-xl border border-dashed line text-sm font-bold muted"><i class="fa-solid fa-plus" aria-hidden="true"></i> ${esc(T('rv.addExtra'))}</button>`;
+    $('#reviewBody').innerHTML = `<div class="space-y-4">
+      <div>
+        <h2 class="text-xl font-extrabold">${esc(T('rv.title'))}</h2>
+        <p class="text-sm muted">${esc(T('rv.sub'))}</p>
+      </div>
+      <div class="surface rounded-2xl p-3 flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex gap-1">${progress}</div>
+        <p class="text-xs font-bold ${pending ? 'terra' : 'ok'}">${esc(pending ? T('rv.pending', { n: pending }) : T('rv.allDone'))}</p>
+      </div>
+      <div class="grid grid-cols-2 gap-2">${views}</div>
+      <div class="space-y-3">${body}</div>
+    </div>`;
+    const b = $('#reviewBadge');
+    b.textContent = pending > 9 ? '9+' : String(pending);
+    b.classList.toggle('hidden', !pending);
+  }
+
   // ---------- RENDER: sohbet ----------
   function chatMessages() {
     return Object.values(D().discussions || {}).filter(m => m && m.text).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)).slice(-100);
@@ -630,6 +771,7 @@
     renderChecklist();
     renderPractical();
     renderChat();
+    renderReview();
     if (state.sheet) renderSheet(true);
   }
 
@@ -839,6 +981,34 @@
         </form>`;
       return;
     }
+    if (s.type === 'review-note') {
+      if (isUpdate) return; // canlı güncelleme yazılan notu silmesin
+      const a = activity(s.id);
+      const r = myReview(s.id) || {};
+      c.innerHTML = sheetHeader(esc(a ? a.name : ''), esc(T('rv.noteSub'))) + `
+        <form id="reviewNoteForm" class="px-5 py-4 space-y-3 pb-safe">
+          <textarea name="note" data-autofocus maxlength="300" rows="4" class="w-full rounded-xl px-3 py-2.5 text-sm" placeholder="${esc(T('rv.notePh'))}">${esc(r.note || '')}</textarea>
+          <button type="submit" class="w-full h-12 rounded-xl btn-accent text-sm font-bold">${esc(T('info.save'))}</button>
+        </form>`;
+      return;
+    }
+    if (s.type === 'review-add') {
+      if (!isUpdate) {
+        c.innerHTML = sheetHeader(esc(T('rv.addTitle')), esc(T('rv.addSub'))) + `
+          <div class="px-5 pt-3"><input id="reviewSearch" data-autofocus type="search" placeholder="${esc(T('sheet.search'))}" value="${esc(s.q || '')}" class="w-full rounded-xl px-3 py-2.5 text-sm"></div>
+          <div id="reviewAddList" class="px-5 py-3 space-y-2 overflow-y-auto flex-1"></div>
+          <div class="px-5 py-3 border-t line pb-safe"><button data-action="rv-custom" class="w-full h-11 rounded-xl btn-ghost text-sm font-bold"><i class="fa-solid fa-plus" aria-hidden="true"></i> ${esc(T('sheet.notListed'))}</button></div>`;
+      }
+      const have = new Set(reviewPlaces().map(p => p.act.id));
+      const q = (s.q || '').trim().toLocaleLowerCase(LANG);
+      const list = allActivities().filter(a => !have.has(a.id) && (!q || `${a.name} ${a.area}`.toLocaleLowerCase(LANG).includes(q)));
+      $('#reviewAddList').innerHTML = list.length ? list.map(a => `<button data-action="rv-add" data-act="${esc(a.id)}" class="w-full surface rounded-xl p-3 flex items-center gap-3 text-left hover:shadow-md transition">
+          <span class="tag-${esc(a.cat)} w-9 h-9 shrink-0 rounded-xl flex items-center justify-center"><i class="fa-solid ${a.icon || 'fa-star'}" aria-hidden="true"></i></span>
+          <span class="min-w-0 flex-1"><span class="block text-sm font-extrabold truncate">${esc(a.name)}</span><span class="block text-[11px] muted truncate">${esc(a.area)}</span></span>
+          <i class="fa-solid fa-plus accent" aria-hidden="true"></i>
+        </button>`).join('') : `<p class="text-sm muted text-center py-6">${esc(T('pool.none'))}</p>`;
+      return;
+    }
     if (s.type === 'confirm-me') {
       // Onay ekranı seçilen kişinin dilinde gösterilir
       const p = person(s.id);
@@ -964,6 +1134,23 @@
       openSheet(s && s.type === 'pick-activity' ? { type: 'custom', day: s.day, slot: s.slot } : { type: 'custom' });
     },
     decide: el => decide(el.dataset.dec, el.dataset.opt),
+    'review-toggle': () => { state.tab = state.tab === 'review' ? 'plan' : 'review'; renderTabs(); window.scrollTo(0, 0); },
+    'rv-view': el => { state.reviewView = el.dataset.v === 'results' ? 'results' : 'mine'; renderReview(); },
+    'rv-went': el => {
+      const id = el.dataset.id;
+      const r = myReview(id);
+      if (el.dataset.v === '1') { if (!(r && r.went)) reviewWrite(id, { went: true }, true); return; }
+      if (r && r.went === false) { reviewWrite(id, null); return; } // tekrar basınca seçim kalkar
+      if (r && (r.rating || r.note) && !confirm(T('rv.clearAsk'))) return;
+      reviewWrite(id, { went: false }, true);
+    },
+    'rv-rate': el => reviewWrite(el.dataset.id, { rating: Number(el.dataset.n) }),
+    'rv-kids': el => { const r = myReview(el.dataset.id) || {}; reviewWrite(el.dataset.id, { kids: r.kids === el.dataset.v ? null : el.dataset.v }); },
+    'rv-again': el => { const r = myReview(el.dataset.id) || {}; reviewWrite(el.dataset.id, { again: r.again ? null : true }); },
+    'rv-note': el => openSheet({ type: 'review-note', id: el.dataset.id }),
+    'rv-add-open': () => openSheet({ type: 'review-add', q: '' }),
+    'rv-add': el => { reviewWrite(el.dataset.act, { went: true }, true).then(ok => ok && toast(T('rv.added'))); closeSheet(); },
+    'rv-custom': () => openSheet({ type: 'custom', review: true }),
     check: el => {
       const cur = (D().checklist || {})[el.dataset.id];
       write(`checklist/${el.dataset.id}`, cur && cur.done ? null : { done: true, by: state.me, at: firebase.database.ServerValue.TIMESTAMP });
@@ -994,6 +1181,10 @@
     if (e.target.id === 'poolSearch' || e.target.id === 'sheetSearch') {
       state.poolQuery = e.target.value;
       if (e.target.id === 'poolSearch') renderPool(); else renderSheet(true);
+    }
+    if (e.target.id === 'reviewSearch' && state.sheet) {
+      state.sheet.q = e.target.value;
+      renderSheet(true);
     }
   });
 
@@ -1046,6 +1237,15 @@
       }).catch(err => toast(T('toast.saveFail', { e: err.code })));
       return;
     }
+    if (e.target.id === 'reviewNoteForm') {
+      e.preventDefault();
+      const s = state.sheet;
+      if (!s) return;
+      const note = e.target.elements.note.value.trim().slice(0, 300);
+      reviewWrite(s.id, { note: note || null }).then(ok => ok && toast(T('toast.saved')));
+      closeSheet();
+      return;
+    }
     if (e.target.id === 'customForm') {
       e.preventDefault();
       const f = new FormData(e.target);
@@ -1061,7 +1261,8 @@
         addedBy: state.me,
         addedAt: firebase.database.ServerValue.TIMESTAMP
       }).then(() => {
-        if (s && s.slot) setTimeout(() => addToSlot('custom:' + ref.key, s.day, s.slot), 300);
+        if (s && s.review) reviewWrite('custom:' + ref.key, { went: true }, true).then(ok => ok && toast(T('rv.added')));
+        else if (s && s.slot) setTimeout(() => addToSlot('custom:' + ref.key, s.day, s.slot), 300);
         else toast(T('toast.poolAdded'));
       }).catch(err => toast(T('toast.saveFail', { e: err.code })));
       closeSheet();
@@ -1146,6 +1347,8 @@
     }
     tripRef = db.ref('trips/' + state.key);
     state.day = todayKey() || 'day1';
+    // Seyahat bittiyse site değerlendirme anketiyle açılır
+    if (localDate(new Date()) > DAYS[DAYS.length - 1].date) state.tab = 'review';
 
     db.ref('.info/connected').on('value', snap => {
       const dot = $('#connDot');

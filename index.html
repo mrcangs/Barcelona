@@ -115,6 +115,7 @@
         </div>
         <div class="flex items-center gap-2">
           <span id="connDot" class="w-2 h-2 rounded-full bg-slate-400" title="Bağlantı"></span>
+          <button data-action="review-toggle" id="reviewToggle" class="hidden lg:flex h-9 px-3 rounded-full btn-ghost text-xs font-bold items-center gap-1.5"></button>
           <button data-action="invite" class="h-9 px-3 rounded-full btn-ghost text-xs font-bold flex items-center gap-1.5" aria-label="Davet linkini kopyala" data-i18n-aria="header.inviteAria">
             <i class="fa-solid fa-link" aria-hidden="true"></i><span class="hidden sm:inline" data-i18n="header.invite">Davet linki</span>
           </button>
@@ -123,7 +124,12 @@
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 pt-4 pb-28 lg:pb-10 lg:grid lg:grid-cols-12 lg:gap-6">
+    <!-- DEĞERLENDİRME (seyahat sonrası anket; masaüstünde de tam genişlik) -->
+    <main id="reviewMain" class="hidden max-w-3xl mx-auto px-4 pt-4 pb-28 lg:pb-10">
+      <div id="reviewBody"></div>
+    </main>
+
+    <main id="mainGrid" class="max-w-7xl mx-auto px-4 pt-4 pb-28 lg:pb-10 lg:grid lg:grid-cols-12 lg:gap-6">
 
       <!-- HAVUZ (masaüstü sol kolon / mobil sekme) -->
       <aside data-panel="pool" class="hidden lg:block lg:col-span-3">
@@ -179,11 +185,12 @@
 
     <!-- Mobil alt navigasyon -->
     <nav class="glass fixed bottom-0 inset-x-0 z-40 border-t line lg:hidden pb-safe">
-      <div class="grid grid-cols-4 max-w-md mx-auto">
+      <div class="grid grid-cols-5 max-w-md mx-auto">
         <button data-action="tab" data-tab="plan"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold"><i class="fa-solid fa-calendar-days text-base" aria-hidden="true"></i><span data-i18n="nav.plan">Plan</span></button>
         <button data-action="tab" data-tab="pool"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold"><i class="fa-solid fa-compass text-base" aria-hidden="true"></i><span data-i18n="nav.pool">Havuz</span></button>
         <button data-action="tab" data-tab="decide" class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold relative"><i class="fa-solid fa-square-check text-base" aria-hidden="true"></i><span data-i18n="nav.decide">Kararlar</span><span id="decideBadge" class="hidden absolute top-2 right-[calc(50%-22px)] w-2 h-2 rounded-full bg-rose-500"></span></button>
         <button data-action="tab" data-tab="chat"   class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold relative"><i class="fa-solid fa-comments text-base" aria-hidden="true"></i><span data-i18n="nav.chat">Sohbet</span><span id="chatBadge" class="hidden absolute top-1.5 right-[calc(50%-26px)] min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] leading-[18px]"></span></button>
+        <button data-action="tab" data-tab="review" class="nav-btn h-14 flex flex-col items-center justify-center gap-0.5 text-[11px] font-bold relative"><i class="fa-solid fa-star text-base" aria-hidden="true"></i><span data-i18n="nav.review">Değerlendir</span><span id="reviewBadge" class="hidden absolute top-1.5 right-[calc(50%-26px)] min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] leading-[18px]"></span></button>
       </div>
     </nav>
   </div>
